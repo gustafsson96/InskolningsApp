@@ -3,7 +3,7 @@ namespace OnboardingApp.Models
 {
     public class UserChecklistItemStatus
     {
-        public int UserChecklistItemId { get; set; }
+        public int UserChecklistItemStatusId { get; set; }
         public string UserId { get; set; } = string.Empty;
         public ApplicationUser? User { get; set; }
         public int ChecklistItemId { get; set; }
