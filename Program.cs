@@ -40,6 +40,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
     string[] roles = { "Admin", "Employee" };
 
@@ -52,12 +53,9 @@ using (var scope = app.Services.CreateScope())
     }
 
     // CREATE ADMIN USER FOR TESTING
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
     string adminEmail = "admin@test.se";
     string adminPassword = "Password123!";
 
-    // Check if user exists
     var adminUser = await userManager.FindByEmailAsync(adminEmail);
 
     if (adminUser == null)
@@ -80,10 +78,40 @@ using (var scope = app.Services.CreateScope())
         }
     }
 
-    // Add to Admin role
     if (adminUser != null && !await userManager.IsInRoleAsync(adminUser, "Admin"))
     {
         await userManager.AddToRoleAsync(adminUser, "Admin");
+    }
+
+    // CREATE EMPLOYEE USER FOR TESTING
+    string employeeEmail = "employee@test.se";
+    string employeePassword = "Password123!";
+
+    var employeeUser = await userManager.FindByEmailAsync(employeeEmail);
+
+    if (employeeUser == null)
+    {
+        employeeUser = new ApplicationUser
+        {
+            UserName = employeeEmail,
+            Email = employeeEmail,
+            EmailConfirmed = true,
+        };
+
+        var result = await userManager.CreateAsync(employeeUser, employeePassword);
+
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors)
+            {
+                Console.WriteLine(error.Description);
+            }
+        }
+    }
+
+    if (employeeUser != null && !await userManager.IsInRoleAsync(employeeUser, "Employee"))
+    {
+        await userManager.AddToRoleAsync(employeeUser, "Employee");
     }
 }
 
