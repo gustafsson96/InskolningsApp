@@ -1,0 +1,8 @@
+@using OnboardingApp.Components.Admin.Layout
+@page "/admin"
+@layout AdminLayout
+@attribute [Authorize(Roles = "Admin")]
+@using Microsoft.AspNetCore.Authorization
+
+<h1>Adminöversikt</h1>
+<p>Här visas admininnehållet.</p>
