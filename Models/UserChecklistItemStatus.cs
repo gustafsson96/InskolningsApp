@@ -8,7 +8,7 @@ namespace OnboardingApp.Models
         public ApplicationUser? User { get; set; }
         public int ChecklistItemId { get; set; }
         public ChecklistItem? ChecklistItem { get; set; }
-        public bool IsCompleted { get; set; }
+        public ChecklistStatus Status { get; set; } = ChecklistStatus.NotStarted;
         public DateTime? CompletedAt { get; set; }
     }
 }
