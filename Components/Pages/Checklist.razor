@@ -21,6 +21,15 @@
 else
 {
     <ProgressBar Total="@TotalChecklistItems" Completed="@CompletedChecklistItems" />
+        <div class="category-progress-container">
+        @foreach (var category in categories)
+        {
+            <CategoryProgressCard
+                Category="@category"
+                Total="@GetTotalForCategory(category)"
+                Completed="@GetCompletedForCategory(category)" />
+        }
+    </div>
     <div class="filter-buttons">
         <button class="filter-button @(selectedCategory == "Alla" ? "active" : "")"
                 @onclick='() => SetCategory("Alla")'>
@@ -155,6 +164,21 @@ else
             ChecklistStatus.Completed => "Klar",
             _ => "Inte påbörjad"
         };
+    }
+
+    private int GetTotalForCategory(string category) =>
+    checklistItems.Count(i => i.Category == category);
+
+    private int GetCompletedForCategory(string category)
+    {
+        var categoryItemIds = checklistItems
+            .Where(i => i.Category == category)
+            .Select(i => i.ChecklistItemId)
+            .ToList();
+
+        return userStatuses.Count(s =>
+            categoryItemIds.Contains(s.ChecklistItemId) &&
+            s.Status == ChecklistStatus.Completed);
     }
 
     private async Task SetStatus(int checklistItemId, ChecklistStatus newStatus)

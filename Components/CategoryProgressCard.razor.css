@@ -1,0 +1,63 @@
+.category-progress-card {
+    background-color: #ffffff;
+    border: 1px solid #dcdcdc;
+    border-radius: 1.5em;
+    padding: 1.5em;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.category-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2em;
+}
+
+.category-progress-header h3 {
+    margin: 0;
+    font-size: 1.2em;
+    font-weight: 700;
+    color: #111827;
+}
+
+.category-progress-count {
+    font-size: 1em;
+    font-weight: 700;
+    color: #111827;
+}
+
+.category-progress-description {
+    margin: 0 0 3em 0;
+    font-size: 1.2em;
+    color: #6b7280;
+}
+
+.category-progress-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75em;
+}
+
+.category-progress-label {
+    font-size: 1em;
+    color: #4b5563;
+}
+
+.category-progress-bar-container {
+    width: 100%;
+    height: 14px;
+    background-color: #d1d5db;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.category-progress-bar-fill {
+    height: 100%;
+    background-color: #8b5cf6;
+    border-radius: 999px;
+    transition: width 0.3s ease;
+}
