@@ -22,13 +22,16 @@ else
 {
     <ProgressBar Total="@TotalChecklistItems" Completed="@CompletedChecklistItems" />
         <div class="category-progress-container">
-        @foreach (var category in categories)
-        {
-            <CategoryProgressCard
-                Category="@category"
-                Total="@GetTotalForCategory(category)"
-                Completed="@GetCompletedForCategory(category)" />
-        }
+            @foreach (var category in categories)
+            {
+                <CategoryProgressCard
+                    Category="@category"
+                    Total="@GetTotalForCategory(category)"
+                    Completed="@GetCompletedForCategory(category)"
+                    IsActive="@(selectedCategory == category)"
+                    OnCategoryClick="SetCategory"
+                    />
+            }
     </div>
     <div class="filter-buttons">
         <button class="filter-button @(selectedCategory == "Alla" ? "active" : "")"
