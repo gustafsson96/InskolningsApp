@@ -5,6 +5,8 @@
 @using Microsoft.EntityFrameworkCore
 @using OnboardingApp.Data
 @using OnboardingApp.Models
+
+@* Restrict access to authenticated users *@
 @attribute [Authorize]
 
 @inject ApplicationDbContext Db
@@ -14,13 +16,16 @@
 <h1>Checklista</h1>
 <p>Här ser du alla moment i din inskolning.</p>
 
+@* Message for loading when data is being fetched *@
 @if (isLoading)
 {
     <p>Laddar...</p>
 }
 else
 {
+    @* Checklist progress bar *@
     <ProgressBar Total="@TotalChecklistItems" Completed="@CompletedChecklistItems" />
+        @* Clickable category cards with individual progress bars *@
         <div class="category-progress-container">
             @foreach (var category in categories)
             {
@@ -33,6 +38,7 @@ else
                     />
             }
     </div>
+    @* Filter buttons based on categories *@
     <div class="filter-buttons">
         <button class="filter-button @(selectedCategory == "Alla" ? "active" : "")"
                 @onclick='() => SetCategory("Alla")'>
@@ -48,27 +54,32 @@ else
         }
     </div>
 
+    @* Message if no items match the selected filter *@
     @if (filteredChecklistItems.Count == 0)
     {
         <p>Inga checklistpunkter hittades.</p>
     }
     else
     {
+        @* Checklist *@
         <div class="checklist-container">
+
+            @* Loop through filtered checklist items and render one card per item *@
             @foreach (ChecklistItem item in filteredChecklistItems.OrderBy(i => i.OrderIndex))
             {
                 <div class="checklist-card">
 
+                    @* Card header *@
                     <div class="checklist-card-header">
                         <div class="checklist-card-title-area">
                             <h4>@item.Title</h4>
-
                             @if (!string.IsNullOrWhiteSpace(item.Category))
                             {
                                 <small class="category">@item.Category</small>
                             }
                         </div>
 
+                        @* Toggle note panel for a checklist item *@
                         <button type="button"
                                 class="note-icon-btn @(IsNoteOpen(item.ChecklistItemId) ? "active" : "")"
                                 @onclick='() => ToggleNote(item.ChecklistItemId)'
@@ -77,6 +88,7 @@ else
                         </button>
                     </div>
 
+                    @* Status buttons to update progress *@
                     <div class="status-buttons">
                         <button class="status-btn @(GetStatus(item.ChecklistItemId) == ChecklistStatus.NotStarted ? "active" : "")"
                                 @onclick='() => SetStatus(item.ChecklistItemId, ChecklistStatus.NotStarted)'>
@@ -94,15 +106,18 @@ else
                         </button>
                     </div>
 
+                    @* Checklist item description *@
                     @if (!string.IsNullOrWhiteSpace(item.Description))
                     {
                         <p>@item.Description</p>
                     }
 
+                    @* Current status (controlled by user) *@
                     <small class="status-text">
                         Status: @GetStatusLabel(item.ChecklistItemId)
                     </small>
-                    
+
+                @* Render note panel when opened *@
                 @if (IsNoteOpen(item.ChecklistItemId))
                 {
                     <div class="note-panel">
@@ -111,15 +126,13 @@ else
                         <div class="note-heading">
                             <span>Personliga anteckningar:</span>
                         </div>
-
                         <textarea id="note-@item.ChecklistItemId"
                                 class="note-textarea"
                                 placeholder="Skriv dina anteckningar här..."
                                 @bind="BindNote[item.ChecklistItemId]"
                                 @bind:event="oninput"
-                                @onblur="async () => await SaveNote(item.ChecklistItemId)"
+                                @onblur="() => SaveNote(item.ChecklistItemId)">
                         </textarea>
-
                         <p class="note-helper-text">Dina anteckningar sparas automatiskt</p>
                     </div>
                     }
@@ -130,22 +143,37 @@ else
 }
 
 @code {
+    // Store checklist items fetched from database
     private List<ChecklistItem> checklistItems = new();
+
+    // Store the current user's saved status for checklist items
     private List<UserChecklistItemStatus> userStatuses = new();
+
+    // Stores the current user's saved notes for checklist items
     private List<UserNote> userNotes = new();
+
+    // Holds the note text in memory for each checklist item while the user is editing
     private Dictionary<int, string> BindNote = new();
 
     private bool isLoading = true;
+
+    // Track currently selected category filter
     private string selectedCategory = "Alla";
+
+    // Store id of authenticated user
     private string currentUserId = string.Empty;
 
+    // Returns the total number of checklist items
     private int TotalChecklistItems => checklistItems.Count;
 
+    // Returns the number of checklist items marked as completed by the user
     private int CompletedChecklistItems => userStatuses
         .Count(s => s.Status == ChecklistStatus.Completed);
 
+    // Store checklist item id for what note panel is currently open (null means that no panel is open)
     private int? openNoteForChecklistItemId = null;
 
+    // Open the note panel for a selected item or close if it is open
     private void ToggleNote(int checklistItemId)
     {
         if (openNoteForChecklistItemId == checklistItemId)
@@ -163,6 +191,7 @@ else
         return openNoteForChecklistItemId == checklistItemId;
     }
 
+    // Returns an ordered list of all available categories in the checklist
     private List<string> categories => checklistItems
         .Where(i => !string.IsNullOrWhiteSpace(i.Category))
         .Select(i => i.Category!)
@@ -170,6 +199,7 @@ else
         .OrderBy(c => c)
         .ToList();
 
+    // Returns either all checklist items or those matching selected category
     private List<ChecklistItem> filteredChecklistItems =>
         selectedCategory == "Alla"
             ? checklistItems
@@ -177,11 +207,14 @@ else
                 .Where(i => i.Category == selectedCategory)
                 .ToList();
 
+    // Runs when component is initialized
+    // Loads the current user, checklist items, item status and existing notes 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = await UserManager.GetUserAsync(authState.User);
 
+        // Stop loading if no authenticated user is found
         if (user is null)
         {
             isLoading = false;
@@ -190,18 +223,22 @@ else
 
         currentUserId = user.Id;
 
+        // Load all checklist items
         checklistItems = await Db.ChecklistItems
             .OrderBy(i => i.OrderIndex)
             .ToListAsync();
 
+        // Load all saved statuses for the current user
         userStatuses = await Db.Set<UserChecklistItemStatus>()
             .Where(s => s.UserId == currentUserId)
             .ToListAsync();
-
+        
+        // Load all saved checklist notes belonging to the current user 
         userNotes = await Db.Set<UserNote>()
             .Where(n => n.UserId == currentUserId && n.ChecklistItemId != null)
             .ToListAsync();
 
+        // Populate the note binding dictionary with existing saved notes
         foreach (var note in userNotes)
         {
             if (note.ChecklistItemId.HasValue)
@@ -210,6 +247,7 @@ else
             }
         }
 
+        // Ensure every checklist item has a dictionary entry even if no note exist yet
         foreach (var item in checklistItems)
         {
             if (!BindNote.ContainsKey(item.ChecklistItemId))
@@ -221,17 +259,20 @@ else
         isLoading = false;
     }
 
+    // Updates the currently selected category filter
     private void SetCategory(string category)
     {
         selectedCategory = category;
     }
 
+    // Returns the current user's saved status for a checklist item
     private ChecklistStatus GetStatus(int checklistItemId)
     {
         var status = userStatuses.FirstOrDefault(s => s.ChecklistItemId == checklistItemId);
         return status?.Status ?? ChecklistStatus.NotStarted;
     }
 
+    // Convert enum states into readable text 
     private string GetStatusLabel(int checklistItemId)
     {
         return GetStatus(checklistItemId) switch
@@ -243,9 +284,11 @@ else
         };
     }
 
+    // Returns total number of checklist items in a given category
     private int GetTotalForCategory(string category) =>
     checklistItems.Count(i => i.Category == category);
 
+    // Returns how many checklist items in a given category are marked as completed
     private int GetCompletedForCategory(string category)
     {
         var categoryItemIds = checklistItems
@@ -258,6 +301,7 @@ else
             s.Status == ChecklistStatus.Completed);
     }
 
+    // Creates or updates the current user's status for a specific item
     private async Task SetStatus(int checklistItemId, ChecklistStatus newStatus)
     {
         var existingStatus = userStatuses
@@ -283,6 +327,7 @@ else
         await Db.SaveChangesAsync();
     }
 
+    // Returns the saved note text for a checklist item
     private string GetNote(int checklistItemId)
     {
         return userNotes
@@ -290,6 +335,7 @@ else
             ?.Content ?? string.Empty;
     }
 
+    // Creates or updates the current user's personal note for a checklist item
     private async Task SaveNote(int checklistItemId)
     {
         var content = BindNote.ContainsKey(checklistItemId)
