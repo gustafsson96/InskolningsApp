@@ -6,18 +6,19 @@
             <h3>@Category</h3>
         </div>
 
+    <!-- Description -->
     @if (!string.IsNullOrWhiteSpace(Description))
     {
         <p class="category-progress-description">@Description</p>
     }
     </div>
 
+    <!-- Card footer with progress bar -->
     <div>
         <div class="category-progress-footer">
             <span class="category-progress-label">Framsteg</span>
             <span class="category-progress-count">@Completed/@Total</span>
         </div>
-
         <div class="category-progress-bar-container">
             <div class="category-progress-bar-fill" style="width: @(Percentage)%"></div>
         </div>
@@ -25,15 +26,23 @@
 </div>
 
 @code {
+    // Category name
     [Parameter] public string Category { get; set; } = string.Empty;
+    // Optional description
     [Parameter] public string? Description { get; set; }
+    // Total number of items for the category
     [Parameter] public int Total { get; set; }
+    // Number of completed items in the category
     [Parameter] public int Completed { get; set; }
+    // Shows if the category is currently selected
     [Parameter] public bool IsActive { get; set; }
+    // Event triggered when the card is clicked
     [Parameter] public EventCallback<string> OnCategoryClick { get; set; }
 
+    // Calculates percentage for completed items (avoid division by 0)
     private int Percentage => Total == 0 ? 0 : (Completed * 100) / Total;
 
+    // Handle click event and notifies parent component
     private async Task HandleClick()
     {
         await OnCategoryClick.InvokeAsync(Category);
