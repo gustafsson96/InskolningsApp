@@ -67,9 +67,10 @@ else
         <div class="checklist-container">
 
             @* Loop through filtered checklist items and render one card per item *@
-            @foreach (ChecklistItem item in filteredChecklistItems.OrderBy(i => i.OrderIndex))
+            @foreach (var item in sortedChecklistItems)
             {
-                <div class="checklist-card @(GetStatus(item.ChecklistItemId) == ChecklistStatus.Completed ? "completed" : "") @(GetStatus(item.ChecklistItemId) == ChecklistStatus.InProgress ? "in-progress" : "")">
+                <div @key="item.ChecklistItemId"
+                    class="checklist-card @(GetStatus(item.ChecklistItemId) == ChecklistStatus.Completed ? "completed" : "") @(GetStatus(item.ChecklistItemId) == ChecklistStatus.InProgress ? "in-progress" : "")">
 
                     @* Card header *@
                     <div class="checklist-card-header">
@@ -180,8 +181,13 @@ else
     private int CompletedChecklistItems => userStatuses
         .Count(s => s.Status == ChecklistStatus.Completed);
 
+    // Sort checklist items
+    private List<ChecklistItem> sortedChecklistItems = new();
+
     // Store checklist item id for what note panel is currently open (null means that no panel is open)
     private int? openNoteForChecklistItemId = null;
+
+
 
     // Open the note panel for a selected item or close if it is open
     private void ToggleNote(int checklistItemId)
@@ -266,6 +272,7 @@ else
             }
         }
 
+        UpdateSortedChecklistItems();
         isLoading = false;
     }
 
@@ -273,6 +280,8 @@ else
     private void SetCategory(string category)
     {
         selectedCategory = category;
+        UpdateSortedChecklistItems();
+        
     }
 
     // Returns the current user's saved status for a checklist item
@@ -365,6 +374,27 @@ else
         {
             await SetStatus(checklistItemId, ChecklistStatus.NotStarted);
         }
+    }
+
+    // Map checklist status to a numeric value used for sorting
+    private int GetSortOrder(ChecklistStatus status)
+    {
+        return status switch
+        {
+            ChecklistStatus.InProgress => 0,
+            ChecklistStatus.NotStarted => 1,
+            ChecklistStatus.Completed => 2,
+            _ => 1
+        };
+    }
+
+    // Create a sorted list of checklist items
+    private void UpdateSortedChecklistItems()
+    {
+        sortedChecklistItems = filteredChecklistItems
+            .OrderBy(i => GetSortOrder(GetStatus(i.ChecklistItemId)))
+            .ThenBy(i => i.OrderIndex)
+            .ToList();
     }
 
     // Returns the saved note text for a checklist item
