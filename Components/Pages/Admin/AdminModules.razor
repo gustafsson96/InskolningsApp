@@ -1,0 +1,205 @@
+@page "/admin/moduler"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using OnboardingApp.Data
+@using OnboardingApp.Models
+@attribute [Authorize(Roles = "Admin")]
+@inject ApplicationDbContext Db
+
+<h1>Hantera moduler</h1>
+<p>Endast administratörer kan visa denna sida.</p>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p>@message</p>
+}
+
+<h2>Skapa ny modul</h2>
+
+<div>
+    <div>
+        <label for="title">Titel</label><br />
+        <input id="title" @bind="newModule.Title" />
+    </div>
+
+    <div>
+        <label for="description">Beskrivning</label><br />
+        <textarea id="description" @bind="newModule.Description"></textarea>
+    </div>
+
+    <button @onclick="CreateModule">Skapa modul</button>
+</div>
+
+<hr />
+
+<h2>Befintliga moduler</h2>
+
+@if (modules.Count == 0)
+{
+    <p>Det finns inga moduler ännu.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Titel</th>
+                <th>Beskrivning</th>
+                <th>Ordning</th>
+                <th>Åtgärder</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var module in modules)
+            {
+                <tr>
+                    @if (editingModuleId == module.ModuleId)
+                    {
+                        <td>
+                            <input @bind="editModule.Title" />
+                        </td>
+                        <td>
+                            <textarea @bind="editModule.Description"></textarea>
+                        </td>
+                        <td>
+                            <input type="number" @bind="editModule.OrderIndex" />
+                        </td>
+                        <td>
+                            <button @onclick="SaveEdit">Spara</button>
+                            <button @onclick="CancelEdit">Avbryt</button>
+                        </td>
+                    }
+                    else
+                    {
+                        <td>@module.Title</td>
+                        <td>@module.Description</td>
+                        <td>@module.OrderIndex</td>
+                        <td>
+                            <button @onclick="() => StartEdit(module)">Redigera</button>
+                            <button @onclick="() => DeleteModule(module.ModuleId)">Ta bort</button>
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Module> modules = new();
+    private Module newModule = new();
+    private int? editingModuleId;
+    private Module editModule = new();
+    private string? message;
+
+    // Fetch modules on page load
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadModules();
+    }
+
+    // Load all modules from db
+    private async Task LoadModules()
+    {
+        modules = await Db.Modules
+            .OrderBy(m => m.OrderIndex)
+            .ToListAsync();
+    }
+
+    // Create module
+    private async Task CreateModule()
+    {
+        if (string.IsNullOrWhiteSpace(newModule.Title))
+        {
+            message = "Titel måste anges.";
+            return;
+        }
+
+        int maxOrderIndex = await Db.Modules
+            .MaxAsync(m => (int?)m.OrderIndex) ?? 0;
+
+        var module = new Module
+        {
+            Title = newModule.Title,
+            Description = newModule.Description,
+            OrderIndex = maxOrderIndex + 1
+        };
+
+        Db.Modules.Add(module);
+        await Db.SaveChangesAsync();
+
+        newModule = new Module();
+        message = "Modulen skapades.";
+
+        await LoadModules();
+    }
+
+    // Edit module
+    private void StartEdit(Module module)
+    {
+        editingModuleId = module.ModuleId;
+
+        editModule = new Module
+        {
+            ModuleId = module.ModuleId,
+            Title = module.Title,
+            Description = module.Description,
+            OrderIndex = module.OrderIndex
+        };
+    }
+
+    // Save edited module
+    private async Task SaveEdit()
+    {
+        var module = await Db.Modules.FindAsync(editModule.ModuleId);
+
+        if (module is null)
+        {
+            message = "Modulen kunde inte hittas.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(editModule.Title))
+        {
+            message = "Titel måste anges.";
+            return;
+        }
+
+        module.Title = editModule.Title;
+        module.Description = editModule.Description;
+        module.OrderIndex = editModule.OrderIndex;
+
+        await Db.SaveChangesAsync();
+
+        editingModuleId = null;
+        editModule = new Module();
+        message = "Modulen uppdaterades.";
+
+        await LoadModules();
+    }
+
+    // Cancel edit
+    private void CancelEdit()
+    {
+        editingModuleId = null;
+        editModule = new Module();
+    }
+
+    // Delete a module
+    private async Task DeleteModule(int moduleId)
+    {
+        var module = await Db.Modules.FindAsync(moduleId);
+
+        if (module is null)
+        {
+            message = "Modulen kunde inte hittas.";
+            return;
+        }
+
+        Db.Modules.Remove(module);
+        await Db.SaveChangesAsync();
+
+        message = "Modulen togs bort.";
+        await LoadModules();
+    }
+}
