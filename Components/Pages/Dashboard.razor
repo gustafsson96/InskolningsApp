@@ -20,14 +20,22 @@ else
         TotalModules="@totalModules"
         CompletedModules="@completedModules"
         RemainingModules="@remainingModules" />
+    <ProgressBar 
+        Total="@totalChecklistItems" 
+        Completed="@completedChecklistItems" />
 }
 
 @code {
     private bool isLoading = true;
 
+    // Module variables
     private int totalModules;
     private int completedModules;
     private int remainingModules;
+
+    // Checklist variables
+    private int totalChecklistItems;
+    private int completedChecklistItems;
 
     protected override async Task OnInitializedAsync()
     {
@@ -54,6 +62,11 @@ else
             .CountAsync(x => x.UserId == userId && x.IsCompleted);
 
         remainingModules = totalModules - completedModules;
+
+        totalChecklistItems = await Db.ChecklistItems.CountAsync();
+
+        completedChecklistItems = await Db.UserChecklistItemStatus
+        .CountAsync(x => x.UserId == userId && x.Status == ChecklistStatus.Completed);
 
         isLoading = false;
     }
