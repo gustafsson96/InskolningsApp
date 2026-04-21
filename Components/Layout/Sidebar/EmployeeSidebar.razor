@@ -1,16 +1,14 @@
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using OnboardingApp.Data
+@using OnboardingApp.Models
+@using ModuleModel = OnboardingApp.Models.Module
+
 @inject AuthenticationStateProvider AuthStateProvider
-
-@code {
-    private ClaimsPrincipal? user;
-
-    protected override async Task OnInitializedAsync()
-    {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        user = authState.User;
-    }
-}
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext Db
 
 <div class="sidebar">
     <div class="sidebar-header">
@@ -41,10 +39,12 @@
 
     <!-- Link to modules -->
     <div class="sidebar-modules">
-        <p class="section-title">Moduler</p>
-        <a href="#" class="module-link">Badvdelningen</a>
-        <a href="#" class="module-link">Receptionen</a>
-        <a href="#" class="module-link">Spa-avdelningen</a>
+        @foreach (var module in modules)
+            {
+                <a href="/module/@module.ModuleId" class="module-link">
+                    @module.Title
+                </a>
+            }
     </div>
 
     <!-- Link to admin dashboard if role = admin -->
@@ -63,3 +63,37 @@
         </div>
     </div>
 </div>
+
+@code {
+    private ClaimsPrincipal? user;
+    private string? fullName;
+    private string initials = "";
+    private List<ModuleModel> modules = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        user = authState.User;
+
+        if (user.Identity?.IsAuthenticated != true)
+            return;
+
+        var appUser = await UserManager.GetUserAsync(user);
+
+        if (appUser is not null)
+        {
+            fullName = $"{appUser.FirstName} {appUser.LastName}".Trim();
+
+            if (!string.IsNullOrWhiteSpace(appUser.FirstName))
+                initials += appUser.FirstName[0];
+
+            if (!string.IsNullOrWhiteSpace(appUser.LastName))
+                initials += appUser.LastName[0];
+        }
+
+        modules = await Db.Modules
+            .Include(m => m.Sections)
+            .OrderBy(m => m.OrderIndex)
+            .ToListAsync();
+    }
+}
