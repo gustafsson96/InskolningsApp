@@ -1,6 +1,180 @@
-    <!-- Searchbar -->
-    <div class="sidebar-search">
-        <div class="search-box">
-            <input type="text" placeholder="Sök innehåll..." />
-        </div>
+@using OnboardingApp.Models
+@using ModuleModel = OnboardingApp.Models.Module
+@inject NavigationManager Nav
+   
+<!-- Searchbar -->
+<div class="sidebar-search">
+    <div class="search-box">
+        <input type="text" placeholder="Sök innehåll..." @bind="SearchTerm" @bind:event="oninput" />
     </div>
+        @if (!string.IsNullOrWhiteSpace(SearchTerm))
+    {
+        @if (searchResults.Count == 0)
+        {
+            <div class="search-results">
+                <p class="search-empty">Inga träffar hittades.</p>
+            </div>
+        }
+        else
+        {
+            <div class="search-results">
+                @foreach (var result in searchResults)
+                {
+                    <button class="search-result-item"
+                            @onclick="() => OpenModule(result.ModuleId)">
+                        <span class="search-result-title">Modul: @result.Title</span>
+
+                        @if (!string.IsNullOrWhiteSpace(result.Snippet))
+                        {
+                            <span class="search-result-snippet">@result.Snippet</span>
+                        }
+                    </button>
+                }
+            </div>
+        }
+    }
+</div>
+@code {
+    // Modules passed from EmployeeSidebar
+    [Parameter] public List<ModuleModel> Modules { get; set; } = new();
+
+    // Current search text
+    private string searchTerm = string.Empty;
+
+    // Filtered search results
+    private List<SearchResultItem> searchResults = new();
+
+    // Updates results when the user types
+    private string SearchTerm
+    {
+        get => searchTerm;
+        set
+        {
+            if (searchTerm != value)
+            {
+                searchTerm = value;
+                UpdateSearchResults();
+            }
+        }
+    }
+
+    // Search through module title, description, section title and section content
+    private void UpdateSearchResults()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            searchResults = new();
+            return;
+        }
+
+        string term = searchTerm.Trim();
+        string lowerTerm = term.ToLower();
+
+        var results = new List<SearchResultItem>();
+
+        foreach (var module in Modules)
+        {
+            // Match module title
+            if (!string.IsNullOrWhiteSpace(module.Title) &&
+                module.Title.ToLower().Contains(lowerTerm))
+            {
+                results.Add(new SearchResultItem
+                {
+                    ModuleId = module.ModuleId,
+                    Title = module.Title,
+                    Snippet = GetSnippet(module.Title, term)
+                });
+            }
+
+            // Match module description
+            if (!string.IsNullOrWhiteSpace(module.Description) &&
+                module.Description.ToLower().Contains(lowerTerm))
+            {
+                results.Add(new SearchResultItem
+                {
+                    ModuleId = module.ModuleId,
+                    Title = module.Title,
+                    Snippet = GetSnippet(module.Description, term)
+                });
+            }
+
+            foreach (var section in module.Sections)
+            {
+                // Match section title
+                if (!string.IsNullOrWhiteSpace(section.Title) &&
+                    section.Title.ToLower().Contains(lowerTerm))
+                {
+                    results.Add(new SearchResultItem
+                    {
+                        ModuleId = module.ModuleId,
+                        Title = module.Title,
+                        Snippet = GetSnippet(section.Title, term)
+                    });
+                }
+
+                // Match section content
+                if (!string.IsNullOrWhiteSpace(section.Content) &&
+                    section.Content.ToLower().Contains(lowerTerm))
+                {
+                    results.Add(new SearchResultItem
+                    {
+                        ModuleId = module.ModuleId,
+                        Title = module.Title,
+                        Snippet = GetSnippet(section.Content, term)
+                    });
+                }
+            }
+        }
+
+        searchResults = results
+            .DistinctBy(x => new { x.ModuleId, x.Snippet })
+            .Take(8)
+            .ToList();
+    }
+
+    // Create short preview around the matching text
+    private string GetSnippet(string text, string term)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return string.Empty;
+
+        int index = text.IndexOf(term, StringComparison.OrdinalIgnoreCase);
+
+        if (index < 0)
+        {
+            return text.Length <= 60
+                ? text
+                : text.Substring(0, 60) + "...";
+        }
+
+        int snippetLength = 60;
+        int start = Math.Max(0, index - 20);
+        int length = Math.Min(snippetLength, text.Length - start);
+
+        string snippet = text.Substring(start, length).Trim();
+
+        if (start > 0)
+            snippet = "..." + snippet;
+
+        if (start + length < text.Length)
+            snippet += "...";
+
+        return snippet;
+    }
+
+    // Navigate to selected module
+    private void OpenModule(int moduleId)
+    {
+        searchTerm = string.Empty;
+        searchResults = new();
+        Nav.NavigateTo($"/modul/{moduleId}");
+    }
+
+    // Represents one search result
+    private class SearchResultItem
+    {
+        public int ModuleId { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Snippet { get; set; } = string.Empty;
+    }
+}
