@@ -28,11 +28,13 @@
 
     <!-- Checklist section -->
     <nav class="sidebar-nav">
-        <a href="#" class="nav-link active">Översikt</a>
-        <a href="#" class="nav-link">
+        <a href="/dashboard" class="nav-link active">Översikt</a>
+        <a href="/checklista" class="nav-link">
             <div class="nav-link-text">
                 <span>Checklista</span>
-                <span class="nav-link-subtext">0/29</span>
+                <span class="nav-link-subtext">
+                    @completedChecklistItems / @totalChecklistItems
+                </span>
             </div>
         </a>
     </nav>
@@ -41,7 +43,7 @@
     <div class="sidebar-modules">
         @foreach (var module in modules)
             {
-                <a href="/module/@module.ModuleId" class="module-link">
+                <a href="/modul/@module.ModuleId" class="module-link">
                     @module.Title
                 </a>
             }
@@ -70,6 +72,8 @@
     private string initials = "";
     private List<ModuleModel> modules = new();
     private int totalModules;
+    private int totalChecklistItems;
+    private int completedChecklistItems;
 
     protected override async Task OnInitializedAsync()
     {
@@ -92,11 +96,17 @@
                 initials += appUser.LastName[0];
         }
 
+        string? userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
         modules = await Db.Modules
             .Include(m => m.Sections)
             .OrderBy(m => m.OrderIndex)
             .ToListAsync();
 
         totalModules = modules.Count;
+
+        totalChecklistItems = await Db.ChecklistItems.CountAsync();
+
+        completedChecklistItems = await Db.UserChecklistItemStatus.CountAsync(x => x.UserId == userId && x.Status == ChecklistStatus.Completed);
     }
 }
