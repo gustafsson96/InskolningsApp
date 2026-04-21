@@ -1,3 +1,4 @@
+@* Component showing module overview cards (used in Dashboard) *@
 <div class="module-overview">
     <div class="overview-card">
         <p>Antal moduler</p>
@@ -16,7 +17,10 @@
 </div>
 
 @code {
+    // Total number of modules
     [Parameter] public int TotalModules { get; set; }
+    // Number of modules completed by the user
     [Parameter] public int CompletedModules { get; set; }
+    // Number of modules the user has left to complete
     [Parameter] public int RemainingModules { get; set; }
 }
