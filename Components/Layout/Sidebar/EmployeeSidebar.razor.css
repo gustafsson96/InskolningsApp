@@ -59,33 +59,6 @@
     margin: 0 0 1.75em 0;
 }
 
-.sidebar-search {
-    margin-bottom: 1.5em;
-}
-
-.search-box {
-    display: flex;
-    align-items: center;
-    gap: 0.75em;
-    background-color: #ffffff;
-    border: 1px solid #d1d5db;
-    border-radius: 18px;
-    padding: 0.9em 1em;
-}
-
-.search-box input {
-    border: none;
-    outline: none;
-    background: transparent;
-    width: 100%;
-    font-size: 1em;
-    color: #111827;
-}
-
-.search-box input::placeholder {
-    color: #6b7280;
-}
-
 .sidebar-nav,
 .sidebar-modules {
     display: flex;
