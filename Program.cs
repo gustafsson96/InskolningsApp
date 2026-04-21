@@ -66,6 +66,8 @@ using (var scope = app.Services.CreateScope())
             UserName = adminEmail,
             Email = adminEmail,
             EmailConfirmed = true,
+            FirstName = "Admin",
+            LastName = "Adminsson",
         };
 
         var result = await userManager.CreateAsync(adminUser, adminPassword);
@@ -97,6 +99,8 @@ using (var scope = app.Services.CreateScope())
             UserName = employeeEmail,
             Email = employeeEmail,
             EmailConfirmed = true,
+            FirstName = "Julia",
+            LastName = "Gustafsson",
         };
 
         var result = await userManager.CreateAsync(employeeUser, employeePassword);
