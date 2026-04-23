@@ -11,5 +11,8 @@ namespace OnboardingApp.Models
         public ICollection<ModuleSection> Sections { get; set; } = new List<ModuleSection>();
         public ICollection<UserModuleProgress> UserProgress { get; set; } =
             new List<UserModuleProgress>();
+
+        public ICollection<QuizQuestion> QuizQuestions { get; set; } = new List<QuizQuestion>();
+        public ICollection<QuizAttempt> QuizAttempts { get; set; } = new List<QuizAttempt>();
     }
 }
