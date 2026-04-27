@@ -70,7 +70,12 @@ else
                             @foreach (var option in question.Options.OrderBy(o => o.QuizOptionId))
                             {
                                 <label class="option-row">
-                                    <input type="radio" name="question-@question.QuizQuestionId" />
+                                    <input type="radio"
+                                           name="question-@question.QuizQuestionId"
+                                           checked="@IsSelected(question.QuizQuestionId, option.QuizOptionId)"
+                                           @onchange="() => SelectAnswer(question.QuizQuestionId, option.QuizOptionId)"
+                                           disabled="@hasSubmitted" />
+
                                     <span>@option.OptionText</span>
                                 </label>
                             }
@@ -79,10 +84,19 @@ else
                 }
 
                 <div class="quiz-actions">
-                    <button class="submit-button" disabled>
+                    <button class="submit-button"
+                            disabled="@(!AllQuestionsAnswered || hasSubmitted)"
+                            @onclick="SubmitQuiz">
                         Skicka
                     </button>
                 </div>
+                @if (hasSubmitted)
+                {
+                    <div class="quiz-result">
+                        <h3>Resultat</h3>
+                        <p>Du fick @score av @questions.Count rätt.</p>
+                    </div>
+                }
             }
         </section>
     </div>
@@ -95,6 +109,17 @@ else
     private ModuleModel? module;
     private List<QuizQuestion> questions = new();
     private bool isLoading = true;
+
+    // Stores the selected answer for each question
+    private Dictionary<int, int> selectedAnswers = new();
+
+    private bool hasSubmitted = false;
+    private int score = 0;
+
+    // Checks if all questions have been answered
+    private bool AllQuestionsAnswered =>
+        questions.Count > 0 &&
+        questions.All(q => selectedAnswers.ContainsKey(q.QuizQuestionId));
 
     protected override async Task OnParametersSetAsync()
     {
@@ -109,7 +134,36 @@ else
             .OrderBy(q => q.OrderIndex)
             .ToListAsync();
 
+        selectedAnswers.Clear();
+        hasSubmitted = false;
+        score = 0;
+
         isLoading = false;
+    }
+
+    // Saves the selected option for a question
+    private void SelectAnswer(int questionId, int optionId)
+    {
+        selectedAnswers[questionId] = optionId;
+    }
+
+    // Checks if an option is currently selected
+    private bool IsSelected(int questionId, int optionId)
+    {
+        return selectedAnswers.TryGetValue(questionId, out int selectedOptionId)
+            && selectedOptionId == optionId;
+    }
+
+    // Calculates the quiz score
+    private void SubmitQuiz()
+    {
+        score = questions.Count(q =>
+            q.Options.Any(o =>
+                o.IsCorrect &&
+                selectedAnswers.TryGetValue(q.QuizQuestionId, out int selectedOptionId) &&
+                selectedOptionId == o.QuizOptionId));
+
+        hasSubmitted = true;
     }
 
     private void GoBack()

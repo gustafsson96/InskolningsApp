@@ -184,6 +184,11 @@
     color: white;
     font-weight: 600;
     font-size: 0.95em;
+    opacity: 1;
+    cursor: pointer;
+}
+
+.submit-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
