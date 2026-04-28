@@ -1,5 +1,6 @@
 @page "/modul/{ModuleId:int}/quiz"
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.EntityFrameworkCore
 @using OnboardingApp.Data
 @using OnboardingApp.Models
@@ -7,6 +8,7 @@
 @attribute [Authorize]
 @inject ApplicationDbContext Db
 @inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
 
 @if (isLoading)
 {
@@ -155,7 +157,7 @@ else
     }
 
     // Calculates the quiz score
-    private void SubmitQuiz()
+    private async Task SubmitQuiz()
     {
         score = questions.Count(q =>
             q.Options.Any(o =>
@@ -164,6 +166,18 @@ else
                 selectedOptionId == o.QuizOptionId));
 
         hasSubmitted = true;
+
+        // Get logged in user
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity?.IsAuthenticated ?? true)
+            return;
+
+        var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId is null)
+            return;
     }
 
     private void GoBack()
