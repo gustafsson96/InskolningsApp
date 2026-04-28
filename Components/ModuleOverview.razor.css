@@ -25,11 +25,11 @@
     color: #101828;
 }
 
-.completed {
+.overview-card h2.completed {
     color: #16a34a;
 }
 
-.remaining {
+.overview-card h2.remaining {
     color: #2563eb;
 }
 
