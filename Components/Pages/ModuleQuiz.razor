@@ -178,42 +178,41 @@ else
 
         if (userId is null)
             return;
-    }
 
-
-    // Create QuizAttempt
-    // A quiz is considered passed when all questions have been correctly answered
-    var attempt = new QuizAttempt
-    {
-        ModuleId = ModuleId,
-        UserId = userId,
-        StartedAt = DateTime.UtcNow,
-        CompletedAt = DateTime.UtcNow,
-        Score = score,
-        TotalQuestions = questions.Count,
-        Passed = score == questions.Count 
-    };
-
-    Db.QuizAttempts.Add(attempt);
-    await Db.SaveChangesAsync(); 
-
-    // Save user's selected answers for a quiz attempt
-    foreach (var q in questions)
-    {
-        if (selectedAnswers.TryGetValue(q.QuizQuestionId, out int selectedOptionId))
+        // Create QuizAttempt
+        // A quiz is considered passed when all questions have been correctly answered
+        var attempt = new QuizAttempt
         {
-            var answer = new QuizAnswer
-            {
-                QuizAttemptId = attempt.QuizAttemptId,
-                QuizQuestionId = q.QuizQuestionId,
-                SelectedOptionId = selectedOptionId
-            };
+            ModuleId = ModuleId,
+            UserId = userId,
+            StartedAt = DateTime.UtcNow,
+            CompletedAt = DateTime.UtcNow,
+            Score = score,
+            TotalQuestions = questions.Count,
+            Passed = score == questions.Count 
+        };
 
-            Db.QuizAnswers.Add(answer);
+        Db.QuizAttempts.Add(attempt);
+        await Db.SaveChangesAsync(); 
+
+        // Save user's selected answers for a quiz attempt
+        foreach (var q in questions)
+        {
+            if (selectedAnswers.TryGetValue(q.QuizQuestionId, out int selectedOptionId))
+            {
+                var answer = new QuizAnswer
+                {
+                    QuizAttemptId = attempt.QuizAttemptId,
+                    QuizQuestionId = q.QuizQuestionId,
+                    SelectedOptionId = selectedOptionId
+                };
+
+                Db.QuizAnswers.Add(answer);
+            }
         }
-    }
 
     await Db.SaveChangesAsync();
+    }
 
     private void GoBack()
     {
