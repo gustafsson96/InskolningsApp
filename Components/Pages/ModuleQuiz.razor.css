@@ -209,21 +209,26 @@
 }
 
 .retry-button {
-    margin-top: 0.75em;
-    margin-left: 0.75em;
-    border: none;
-    border-radius: 10px;
-    padding: 0.7em 1.1em;
-    background: #e5e7eb;
+    width: 100%;
+    margin-top: 1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6em;
+    border: 1px solid #d1d5db;
+    border-radius: 14px;
+    padding: 0.9em 1.2em;
+    background: #f9fafb;
     color: #111827;
     font-weight: 600;
-    font-size: 0.9em;
+    font-size: 0.95em;
     cursor: pointer;
-    transition: background 0.15s ease;
+    transition: all 0.15s ease;
 }
 
 .retry-button:hover {
-    background: #d1d5db;
+    background: #f3f4f6;
+    border-color: #9ca3af;
 }
 
 .option-row.correct {
