@@ -95,8 +95,20 @@ else
                 @if (hasSubmitted)
                 {
                     <div class="quiz-result">
+                    @if (score == questions.Count)
+                    {
+                        <h3>Modulen är avklarad!</h3>
+                        <p>Du fick @score av @questions.Count rätt. Full pott.</p>
+                        <p>Du kan göra om quizet när som helst för repetition.</p>
+                        <button class="retry-button" @onclick="RestartQuiz">
+                            Gör quizet igen
+                        </button>
+                    }
+                    else
+                    {
                         <h3>Resultat</h3>
                         <p>Du fick @score av @questions.Count rätt.</p>
+                        <p>Du måste få alla rätt för att modulen ska anses som avklarad.</p>
                         <button class="show-answers-button" @onclick="ToggleShowAnswers">
                             @(showAnswers ? "Dölj svar" : "Visa svar")
                         </button>
@@ -104,6 +116,7 @@ else
                         <button class="retry-button" @onclick="RestartQuiz">
                             Gör quizet igen
                         </button>
+                    }
                     </div>
                 }
             }
