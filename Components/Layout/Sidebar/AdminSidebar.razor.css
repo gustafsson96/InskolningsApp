@@ -35,7 +35,7 @@
     gap: 0.75em;
 }
 
-.admin-link {
+::deep .admin-link {
     display: flex;
     align-items: center;
     gap: 0.9em;
@@ -48,11 +48,11 @@
     transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-.admin-link:hover {
+::deep .admin-link:hover {
     background-color: rgba(255, 255, 255, 0.08);
 }
 
-.admin-link.active {
+::deep .admin-link.active {
     background-color: #3b82f6;
     color: #ffffff;
     font-weight: 600;
