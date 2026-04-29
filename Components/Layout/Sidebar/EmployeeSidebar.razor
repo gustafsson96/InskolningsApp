@@ -23,44 +23,42 @@
         <p class="progress-text">@completedModules av @totalModules moduler slutförda</p>
     </div>
 
-    <hr class="sidebar-divider" />
-
-    <SidebarSearch Modules="@modules" />
-
-    <!-- Checklist section -->
-    <nav class="sidebar-nav">
-        <NavLink href="/dashboard" class="nav-link" ActiveClass="active">
-            Översikt
-        </NavLink>
-        <NavLink href="/checklista" class="nav-link" ActiveClass="active">
-            <div class="nav-link-text">
-                <span>Checklista</span>
-                <span class="nav-link-subtext">
-                    @completedChecklistItems / @totalChecklistItems
-                </span>
-            </div>
-        </NavLink>
-    </nav>
-
-    <!-- Link to modules -->
-    <div class="sidebar-modules">
-    <p class="section-title">Moduler</p>
-        @foreach (var module in modules)
-            {
-            <NavLink href="@($"/modul/{module.ModuleId}")"
-                    class="module-link"
-                    ActiveClass="active">
-                @module.Title
+        <SidebarSearch Modules="@modules" />
+        <div class="sidebar-main">
+        <!-- Checklist section -->
+        <nav class="sidebar-nav">
+            <NavLink href="/dashboard" class="nav-link" ActiveClass="active">
+                Översikt
             </NavLink>
-            }
-    </div>
+            <NavLink href="/checklista" class="nav-link" ActiveClass="active">
+                <div class="nav-link-text">
+                    <span>Checklista</span>
+                    <span class="nav-link-subtext">
+                        @completedChecklistItems / @totalChecklistItems
+                    </span>
+                </div>
+            </NavLink>
+        </nav>
+        <!-- Link to modules -->
+        <div class="sidebar-modules">
+        <p class="section-title">Moduler</p>
+            @foreach (var module in modules)
+                {
+                <NavLink href="@($"/modul/{module.ModuleId}")"
+                        class="module-link"
+                        ActiveClass="active">
+                    @module.Title
+                </NavLink>
+                }
+        </div>
 
-    <!-- Link to admin dashboard if role = admin -->
-    @if (user?.IsInRole("Admin") == true)
-    {
-        <p class="section-title">Admin</p>
-        <a href="/admin" class="nav-link">Adminpanel</a>
-    }
+        <!-- Link to admin dashboard if role = admin -->
+        @if (user?.IsInRole("Admin") == true)
+        {
+            <p class="section-title">Admin</p>
+            <a href="/admin" class="nav-link">Adminpanel</a>
+        }
+    </div>
 
     <!-- Profile section -->
     <div class="sidebar-user">
