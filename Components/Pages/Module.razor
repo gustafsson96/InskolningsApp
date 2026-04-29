@@ -96,8 +96,8 @@ else
     // Loading state while fetching data
     private bool isLoading = true;
 
-    // Runs when the component is first initialized
-    protected override async Task OnInitializedAsync()
+    // Run when route parameter changes
+    protected override async Task OnParametersSetAsync()
     {
         await LoadModule();
     }
@@ -105,6 +105,11 @@ else
     // Fetch module and its sections from database
     private async Task LoadModule()
     {
+        isLoading = true;
+        module = null;
+        sections = new();
+        currentIndex = 0;
+
         module = await Db.Modules
             .Include(m => m.Sections)
             .FirstOrDefaultAsync(m => m.ModuleId == ModuleId);
