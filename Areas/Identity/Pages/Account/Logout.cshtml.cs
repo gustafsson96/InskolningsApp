@@ -30,7 +30,7 @@ namespace OnboardingApp.Areas.Identity.Pages.Account
         public async Task<IActionResult> OnPost(string returnUrl = null)
         {
             await _signInManager.SignOutAsync();
-            _logger.LogInformation("User logged out.");
+            _logger.LogInformation("Användaren har loggats ut.");
             if (returnUrl != null)
             {
                 return LocalRedirect(returnUrl);

@@ -18,7 +18,7 @@
         <h2>Välkommen</h2>
         <p class="login-card-subtitle">Ange dina uppgifter för att fortsätta</p>
 
-        <form id="account" method="post">
+        <form id="account" method="post" novalidate>
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
 
             <div class="login-field">
@@ -26,7 +26,7 @@
                 <input asp-for="Input.Email"
                        autocomplete="username"
                        aria-required="true"
-                       placeholder="din.epost@foretag.se" />
+                       placeholder="namn@umea.se" />
                 <span asp-validation-for="Input.Email" class="text-danger"></span>
             </div>
 
@@ -35,7 +35,7 @@
                 <input asp-for="Input.Password"
                        autocomplete="current-password"
                        aria-required="true"
-                       placeholder="Ange ditt lösenord" />
+                       placeholder="Ange lösenord" />
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
             </div>
 
