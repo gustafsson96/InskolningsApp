@@ -28,6 +28,7 @@
     color: #111827;
 }
 
+/* User information */
 .profile-card {
     max-width: 900px;
     background: #ffffff;
@@ -85,4 +86,72 @@
     font-size: 1.1em;
     font-weight: 600;
     color: #111827;
+}
+
+/* Change password */
+
+.password-card {
+    margin-top: 1.5em;
+}
+
+.password-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5em;
+    margin-bottom: 1em;
+}
+
+.password-card-header h2 {
+    margin: 0;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.4em;
+}
+
+.form-group label {
+    font-size: 1em;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.45em;
+}
+
+.form-group input {
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    background-color: #f3f4f6;
+    padding: 1em 1.1em;
+    font-size: 1em;
+    color: #111827;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: 2px solid #2563eb;
+    background-color: #ffffff;
+}
+
+.form-group small {
+    margin-top: 0.4em;
+    color: #6b7280;
+    font-size: 0.9em;
+}
+
+.password-button {
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    background-color: #020617;
+    color: #ffffff;
+    padding: 1em;
+    font-size: 1em;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.password-button:hover {
+    background-color: #111827;
 }
