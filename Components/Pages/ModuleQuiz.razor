@@ -110,6 +110,9 @@ else
                     {
                         <h3>Repetition slutförd :-)</h3>
                         <p>Du fick @score av @questions.Count rätt.</p>
+                        <button class="show-answers-button" @onclick="ToggleShowAnswers">
+                            @(showAnswers ? "Dölj svar" : "Visa svar")
+                        </button>
                     }
                     else if (score == questions.Count)
                     {
