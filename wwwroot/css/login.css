@@ -1,14 +1,12 @@
 /* Login page */
 
 .login-page {
-    background-color: red;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 2em;
-    background: linear-gradient(180deg, #eef4ff 0%, #e8eefc 100%);
 }
 
 .login-header {
