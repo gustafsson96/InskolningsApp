@@ -155,3 +155,18 @@
 .password-button:hover {
     background-color: #111827;
 }
+
+.password-message {
+    padding: 0.9em 1em;
+    border-radius: 12px;
+}
+
+.password-message.success {
+    background-color: #ecfdf5;
+    color: #047857;
+}
+
+.password-message.error {
+    background-color: #fef2f2;
+    color: #b91c1c;
+}

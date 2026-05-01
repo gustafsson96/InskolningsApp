@@ -56,23 +56,33 @@
             <h2>Ändra lösenord</h2>
         </div>
 
+        @if (!string.IsNullOrWhiteSpace(successMessage))
+        {
+            <p class="password-message success">@successMessage</p>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            <p class="password-message error">@errorMessage</p>
+        }
+
         <div class="form-group">
             <label>Nuvarande lösenord</label>
-            <input type="password" placeholder="Nuvarande lösenord" />
+            <input type="password" placeholder="Nuvarande lösenord" @bind="currentPassword" />
         </div>
 
         <div class="form-group">
             <label>Nytt lösenord</label>
-            <input type="password" placeholder="Nytt lösenord" />
+            <input type="password" placeholder="Nytt lösenord" @bind="newPassword" />
             <small>Lösenordet måste vara minst 8 tecken</small>
         </div>
 
         <div class="form-group">
             <label>Bekräfta nytt lösenord</label>
-            <input type="password" placeholder="Bekräfta nytt lösenord" />
+            <input type="password" placeholder="Bekräfta nytt lösenord" @bind="confirmPassword" />
         </div>
 
-        <button type="button" class="password-button">
+        <button type="button" class="password-button" @onclick="ChangePassword">
             Byt lösenord
         </button>
     </div>
@@ -85,6 +95,13 @@
     private string startDate = "";
     private bool isLoading = true;
 
+    private string currentPassword = "";
+    private string newPassword = "";
+    private string confirmPassword = "";
+
+    private string successMessage = "";
+    private string errorMessage = "";
+    
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
@@ -106,6 +123,52 @@
         }
 
         isLoading = false;
+    }
+
+    // Change password and show feedback messages
+    private async Task ChangePassword()
+    {
+        successMessage = "";
+        errorMessage = "";
+
+        if (appUser is null)
+        {
+            errorMessage = "Användaren hittades inte.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(currentPassword) ||
+            string.IsNullOrWhiteSpace(newPassword) ||
+            string.IsNullOrWhiteSpace(confirmPassword))
+        {
+            errorMessage = "Alla fält måste fyllas i.";
+            return;
+        }
+
+        if (newPassword != confirmPassword)
+        {
+            errorMessage = "Lösenorden matchar inte.";
+            return;
+        }
+
+        var result = await UserManager.ChangePasswordAsync(
+            appUser,
+            currentPassword,
+            newPassword
+        );
+
+        if (result.Succeeded)
+        {
+            successMessage = "Lösenordet har uppdaterats.";
+
+            currentPassword = "";
+            newPassword = "";
+            confirmPassword = "";
+        }
+        else
+        {
+            errorMessage = string.Join(" ", result.Errors.Select(e => e.Description));
+        }
     }
 
     private void GoBack()
