@@ -1,0 +1,308 @@
+@page "/admin/checklista"
+@layout AdminLayout
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using OnboardingApp.Data
+@using OnboardingApp.Models
+@attribute [Authorize(Roles = "Admin")]
+@inject ApplicationDbContext Db
+
+<h1>Hantera checklista</h1>
+<p>Här kan administratörer skapa, ändra och ta bort checklistpunkter.</p>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p>@message</p>
+}
+
+<section style="border:1px solid #ccc; padding:1em; margin-bottom:1.5em;">
+    <h2>Skapa ny checklistpunkt</h2>
+
+    <div>
+        <label>Titel</label><br />
+        <input @bind="newItem.Title" />
+    </div>
+
+    <div style="margin-top:0.5em;">
+        <label>Beskrivning</label><br />
+        <textarea @bind="newItem.Description"></textarea>
+    </div>
+
+    <div style="margin-top:0.5em;">
+        <label>Kategori</label><br />
+        <select @bind="newItem.Category">
+            <option value="">Välj kategori</option>
+            @foreach (var module in modules)
+            {
+                <option value="@module.Title">@module.Title</option>
+            }
+        </select>
+    </div>
+
+    <div style="margin-top:0.5em;">
+        <button @onclick="CreateChecklistItem">Lägg till checklistpunkt</button>
+    </div>
+</section>
+
+<section>
+    <h2>Befintliga checklistpunkter</h2>
+
+    @if (checklistItems.Count == 0)
+    {
+        <p>Inga checklistpunkter finns ännu.</p>
+    }
+    else
+    {
+        @foreach (var item in checklistItems.OrderBy(i => i.OrderIndex))
+        {
+            var editForm = GetEditForm(item.ChecklistItemId);
+
+            <div style="border:1px solid #ddd; padding:1em; margin-bottom:1em;">
+                <h3>@item.Title</h3>
+
+                @if (!string.IsNullOrWhiteSpace(item.Description))
+                {
+                    <p>@item.Description</p>
+                }
+
+                <p>
+                    <strong>Kategori:</strong>
+                    @(string.IsNullOrWhiteSpace(item.Category) ? "Ingen kategori" : item.Category)
+                </p>
+
+                <p>
+                    <strong>Sortering:</strong> @item.OrderIndex
+                </p>
+
+                <h4>Redigera</h4>
+
+                <div>
+                    <label>Titel</label><br />
+                    <input @bind="editForm.Title" />
+                </div>
+
+                <div style="margin-top:0.5em;">
+                    <label>Beskrivning</label><br />
+                    <textarea @bind="editForm.Description"></textarea>
+                </div>
+
+                <div style="margin-top:0.5em;">
+                    <label>Kategori</label><br />
+                    <select @bind="editForm.Category">
+                        <option value="">Välj kategori</option>
+                        @foreach (var module in modules)
+                        {
+                            <option value="@module.Title">@module.Title</option>
+                        }
+                    </select>
+                </div>
+
+                <div style="margin-top:0.5em;">
+                    <label>Sorteringsordning</label><br />
+                    <input type="number" @bind="editForm.OrderIndex" />
+                </div>
+
+                <div style="margin-top:0.75em;">
+                    <button @onclick="() => UpdateChecklistItem(item.ChecklistItemId)">
+                        Spara ändringar
+                    </button>
+
+                    <button @onclick="() => DeleteChecklistItem(item.ChecklistItemId)">
+                        Ta bort
+                    </button>
+                </div>
+            </div>
+        }
+    }
+</section>
+
+@code {
+    // Stores all checklist items from the database
+    private List<ChecklistItem> checklistItems = new();
+
+    // Stores all modules (used to populate category dropdown)
+    private List<Module> modules = new();
+
+    // Feedback message shown to admin after actions
+    private string? message;
+
+    // Model used when creating a new checklist item
+    private ChecklistFormModel newItem = new();
+
+    // Stores edit forms per checklist item
+    private Dictionary<int, ChecklistFormModel> editForms = new();
+
+    // Simple form model used for both create and edit operations
+    private class ChecklistFormModel
+    {
+        public string Title { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public string? Category { get; set; }
+        public int OrderIndex { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    // Loads checklist items and modules from database
+    private async Task LoadData()
+    {
+        // Load modules (used as categories)
+        modules = await Db.Modules
+            .OrderBy(m => m.OrderIndex)
+            .ToListAsync();
+
+        // Load checklist items
+        checklistItems = await Db.ChecklistItems
+            .OrderBy(i => i.OrderIndex)
+            .ToListAsync();
+
+        // Reset edit forms
+        editForms.Clear();
+
+        // Create one edit form per checklist item
+        foreach (var item in checklistItems)
+        {
+            editForms[item.ChecklistItemId] = new ChecklistFormModel
+            {
+                Title = item.Title,
+                Description = item.Description,
+                Category = item.Category,
+                OrderIndex = item.OrderIndex
+            };
+        }
+    }
+
+    // Returns edit form for a specific checklist item
+    private ChecklistFormModel GetEditForm(int checklistItemId)
+    {
+        if (!editForms.ContainsKey(checklistItemId))
+        {
+            editForms[checklistItemId] = new ChecklistFormModel();
+        }
+
+        return editForms[checklistItemId];
+    }
+
+    // Creates a new checklist item
+    private async Task CreateChecklistItem()
+    {
+        // Validate title
+        if (string.IsNullOrWhiteSpace(newItem.Title))
+        {
+            message = "Titel måste anges.";
+            return;
+        }
+
+        // Validate category
+        if (string.IsNullOrWhiteSpace(newItem.Category))
+        {
+            message = "Kategori måste väljas.";
+            return;
+        }
+
+        // Get next order index (place item last)
+        int maxOrderIndex = await Db.ChecklistItems
+            .MaxAsync(i => (int?)i.OrderIndex) ?? 0;
+
+        // Create new checklist item
+        var checklistItem = new ChecklistItem
+        {
+            Title = newItem.Title,
+            Description = newItem.Description,
+            Category = newItem.Category,
+            OrderIndex = maxOrderIndex + 1
+        };
+
+        Db.ChecklistItems.Add(checklistItem);
+        await Db.SaveChangesAsync();
+
+        // Reset form
+        newItem = new ChecklistFormModel();
+
+        message = "Checklistpunkten skapades.";
+
+        // Reload data 
+        await LoadData();
+    }
+
+    // Updates an existing checklist item
+    private async Task UpdateChecklistItem(int checklistItemId)
+    {
+        var form = GetEditForm(checklistItemId);
+
+        // Validate title
+        if (string.IsNullOrWhiteSpace(form.Title))
+        {
+            message = "Titel måste anges.";
+            return;
+        }
+
+        // Validate category
+        if (string.IsNullOrWhiteSpace(form.Category))
+        {
+            message = "Kategori måste väljas.";
+            return;
+        }
+
+        // Fetch item from database
+        var checklistItem = await Db.ChecklistItems
+            .FirstOrDefaultAsync(i => i.ChecklistItemId == checklistItemId);
+
+        if (checklistItem is null)
+        {
+            message = "Checklistpunkten kunde inte hittas.";
+            return;
+        }
+
+        // Update fields
+        checklistItem.Title = form.Title;
+        checklistItem.Description = form.Description;
+        checklistItem.Category = form.Category;
+        checklistItem.OrderIndex = form.OrderIndex;
+
+        await Db.SaveChangesAsync();
+
+        message = "Checklistpunkten uppdaterades.";
+
+        await LoadData();
+    }
+
+    // Deletes a checklist item and related data
+    private async Task DeleteChecklistItem(int checklistItemId)
+    {
+        // Fetch item
+        var checklistItem = await Db.ChecklistItems
+            .FirstOrDefaultAsync(i => i.ChecklistItemId == checklistItemId);
+
+        if (checklistItem is null)
+        {
+            message = "Checklistpunkten kunde inte hittas.";
+            return;
+        }
+
+        // Remove all user statuses related to this item
+        var statuses = await Db.Set<UserChecklistItemStatus>()
+            .Where(s => s.ChecklistItemId == checklistItemId)
+            .ToListAsync();
+
+        // Remove all notes related to this item
+        var notes = await Db.Set<UserNote>()
+            .Where(n => n.ChecklistItemId == checklistItemId)
+            .ToListAsync();
+
+        Db.Set<UserChecklistItemStatus>().RemoveRange(statuses);
+        Db.Set<UserNote>().RemoveRange(notes);
+
+        // Remove checklist item
+        Db.ChecklistItems.Remove(checklistItem);
+
+        await Db.SaveChangesAsync();
+
+        message = "Checklistpunkten togs bort.";
+
+        await LoadData();
+    }
+}
