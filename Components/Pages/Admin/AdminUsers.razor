@@ -57,6 +57,60 @@
     </div>
 </section>
 
+<section>
+    <h2>Befintliga användare</h2>
+
+    @if (users.Count == 0)
+    {
+        <p>Inga användare hittades.</p>
+    }
+    else
+    {
+        @foreach (var user in users)
+        {
+            var form = GetEditForm(user.Id);
+
+            <div style="border:1px solid #ddd; padding:1em; margin-bottom:1em;">
+                <h3>@user.FirstName @user.LastName</h3>
+                <p><strong>E-post:</strong> @user.Email</p>
+
+                <div>
+                    <label>Förnamn</label><br />
+                    <input @bind="form.FirstName" />
+                </div>
+
+                <div style="margin-top:0.5em;">
+                    <label>Efternamn</label><br />
+                    <input @bind="form.LastName" />
+                </div>
+
+                <div style="margin-top:0.5em;">
+                    <label>E-post</label><br />
+                    <input @bind="form.Email" />
+                </div>
+
+                <div style="margin-top:0.5em;">
+                    <label>Startdatum</label><br />
+                    <input type="date" @bind="form.Startdate" />
+                </div>
+
+                <div style="margin-top:0.5em;">
+                    <label>Roll</label><br />
+                    <select @bind="form.Role">
+                        <option value="Employee">Employee</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+
+                <div style="margin-top:0.75em;">
+                    <button @onclick="() => UpdateUser(user.Id)">Spara ändringar</button>
+                    <button @onclick="() => DeleteUser(user.Id)">Ta bort</button>
+                </div>
+            </div>
+        }
+    }
+</section>
+
 @code {
     // Stores users from Identity
     private List<ApplicationUser> users = new();
