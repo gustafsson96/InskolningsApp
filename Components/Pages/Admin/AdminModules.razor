@@ -28,7 +28,7 @@
 
 @if (showCreateForm)
 {
-    <section class="module-form-card">
+    <section class="admin-form-card">
     <h2>Skapa ny modul</h2>
 
             <div class="form-group">
@@ -64,12 +64,12 @@ else
             {
                 <div class="edit-module-form">
                     <div class="form-group">
-                        <label>Titel</label><br />
+                        <label>Titel</label>
                         <input @bind="editModule.Title" />
                     </div>
 
                     <div class="form-group">
-                        <label>Beskrivning</label><br />
+                        <label>Beskrivning</label>
                         <textarea @bind="editModule.Description"></textarea>
                     </div>
 
@@ -118,40 +118,55 @@ else
                         </button>
                     </div>
             }
-
-            <h4>Sektioner</h4>
+            <div class="sections-area"> 
+                <h3>Innehållssektioner</h3>
 
             @if (module.Sections == null || !module.Sections.Any())
             {
-                <p>Inga sektioner ännu.</p>
+                <p class="empty-text">Inga sektioner ännu.</p>
             }
             else
             {
-                <ul>
-                    @foreach (var section in module.Sections.OrderBy(s => s.OrderIndex))
+                <div class="section-list">
+                    @foreach (var moduleSection in module.Sections.OrderBy(s => s.OrderIndex))
                     {
-                        <li>
-                            <strong>@((MarkupString)section.Title):</strong>
-                           @((MarkupString)section.Content)
-                        </li>
+                        <div class="section-item">
+                            <span>@moduleSection.OrderIndex</span>
+                            <div>
+                                <strong>@moduleSection.Title:</strong>
+                                <p>@((MarkupString)moduleSection.Content)</p>
+                            </div>
+                        </div>
                     }
-                </ul>
+                </div>
             }
 
-            <h4>Skapa ny sektion</h4>
+            <div class="add-section-details">
+                <button class="secondary-button add-section-button" @onclick="() => ToggleSectionForm(module.ModuleId)">
+                    <i class="fa-solid fa-plus"></i>
+                    Lägg till sektion
+                </button>
 
-            <div>
-                <label>Titel</label><br />
-                <input @bind="sectionForm.Title" />
-            </div>
+                @if (openSectionFormId == module.ModuleId)
+                {
 
-            <div>
-                <label>Innehåll</label><br />
-                <textarea @bind="sectionForm.Content"></textarea>
-            </div>
+                <div class="section-form">
+                    <div class="form-group">
+                        <label>Titel</label>
+                        <input @bind="sectionForm.Title" />
+                    </div>
 
-            <div style="margin-top:0.5em;">
-                <button @onclick="() => CreateSection(module.ModuleId)">Lägg till sektion</button>
+                    <div class="form-group">
+                        <label>Innehåll</label>
+                        <textarea @bind="sectionForm.Content"></textarea>
+                    </div>
+
+                        <button class="primary-button" @onclick="() => CreateSection(module.ModuleId)">
+                            Lägg till sektion
+                        </button>
+                    </div>
+                    }
+                </div>
             </div>
         </div>
     }
@@ -166,6 +181,7 @@ else
     private Module editModule = new();
     private string? message;
     private bool showCreateForm = false;
+    private int? openSectionFormId;
 
     // View model for a new section
     private class NewSectionModel
@@ -188,6 +204,7 @@ else
     {
         modules = await Db.Modules
             .Include(m => m.Sections)
+            .Include(m => m.QuizQuestions)
             .OrderBy(m => m.OrderIndex)
             .ToListAsync();
     }
@@ -222,6 +239,7 @@ else
         await Db.SaveChangesAsync();
 
         newModule = new Module();
+        showCreateForm = false;
         message = "Modulen skapades.";
 
         await LoadModules();
@@ -313,6 +331,12 @@ else
 
             return newSections[moduleId];
         }
+
+    // Open/close section from
+    private void ToggleSectionForm(int moduleId)
+    {
+        openSectionFormId = openSectionFormId == moduleId ? null : moduleId;
+    }
 
     // Create a new section for a module
     private async Task CreateSection(int moduleId)

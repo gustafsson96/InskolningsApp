@@ -174,3 +174,113 @@
 .module-card-links {
     margin-top: 1.25em;
 }
+
+.edit-module-form {
+    max-width: 700px;
+}
+
+.sections-area {
+    margin-top: 1.5em;
+    padding-top: 1.5em;
+    border-top: 1px solid #e4e7ec;
+}
+
+.sections-area h3 {
+    margin-top: 0;
+}
+
+.empty-text {
+    color: #667085;
+}
+
+.section-list {
+    display: grid;
+    gap: 0.75em;
+    margin-bottom: 1em;
+}
+
+.section-item {
+    display: flex;
+    gap: 1em;
+    background: #f9fafb;
+    border-radius: 14px;
+    padding: 1em;
+}
+
+.section-item span {
+    min-width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.section-item div {
+    min-width: 0;
+}
+
+.section-item strong {
+    color: #101828;
+}
+
+.section-item p {
+    margin: 0.35em 0 0 0;
+    color: #667085;
+    line-height: 1.5;
+}
+
+.add-section-details {
+    margin-top: 1em;
+}
+
+.add-section-details {
+    margin-top: 1.25em;
+    padding: 1em;
+    border: 1px solid #e4e7ec;
+    border-radius: 16px;
+    background: #fcfcfd;
+}
+
+.add-section-details > p {
+    margin: 0 0 1em 0;
+    font-weight: 700;
+    color: #101828;
+}
+
+.section-form {
+    margin-top: 0;
+}
+
+.section-form .primary-button {
+    margin-top: 0.25em;
+}
+
+.add-section-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    background: white;
+}
+
+.add-section-button:hover {
+    background: #f9fafb;
+}
+
+@media (max-width: 700px) {
+    .admin-page-header,
+    .module-card-top {
+        flex-direction: column;
+    }
+
+    .module-actions {
+        justify-content: flex-start;
+    }
+
+    .module-meta {
+        flex-direction: column;
+        gap: 0.75em;
+    }
+}
