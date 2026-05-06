@@ -21,9 +21,9 @@
         </button>
     </div>  
 
-@if (!string.IsNullOrWhiteSpace(message))
+@if (!string.IsNullOrWhiteSpace(moduleMessage))
 {
-    <p class="admin-message">@message</p>
+    <p class="admin-message">@moduleMessage</p>
 }
 
 @if (showCreateForm)
@@ -81,42 +81,42 @@ else
             }
             else
             {
-                    <div class="module-card-top">
-                        <div class="module-title-row">
-                            <span class="module-order">@module.OrderIndex</span>
-                                <div>
-                                <h2>@module.Title</h2>
-                                <p>@module.Description</p>
-                            </div>
-                        </div>
-                        <div class="module-actions">
-                            <button class="icon-button" title="Redigera" @onclick="() => StartEdit(module)">
-                                <i class="fa-regular fa-pen-to-square"></i>
-                            </button>
-
-                            <button class="icon-button danger" title="Ta bort" @onclick="() => DeleteModule(module.ModuleId)">
-                                    <i class="fa-regular fa-trash-can"></i>
-                            </button>
+                <div class="module-card-top">
+                    <div class="module-title-row">
+                        <span class="module-order">@module.OrderIndex</span>
+                            <div>
+                            <h2>@module.Title</h2>
+                            <p>@module.Description</p>
                         </div>
                     </div>
+                    <div class="module-actions">
+                        <button class="icon-button" title="Redigera" @onclick="() => StartEdit(module)">
+                            <i class="fa-regular fa-pen-to-square"></i>
+                        </button>
 
-                    <div class="module-meta">
-                       <span>
-                            <i class="fa-regular fa-file-lines"></i>
-                                @module.Sections.Count sektioner
-                        </span>
-
-                        <span>
-                            <i class="fa-regular fa-circle-question"></i>
-                            @module.QuizQuestions.Count quizfrågor
-                        </span>
-                    </div>
-
-                    <div class="module-card-links">
-                        <button class="secondary-button" @onclick='() => Nav.NavigateTo("/admin/quiz")'>
-                            Hantera quiz
+                        <button class="icon-button danger" title="Ta bort" @onclick="() => DeleteModule(module.ModuleId)">
+                                <i class="fa-regular fa-trash-can"></i>
                         </button>
                     </div>
+                </div>
+
+                <div class="module-meta">
+                    <span>
+                        <i class="fa-regular fa-file-lines"></i>
+                            @module.Sections.Count sektioner
+                    </span>
+
+                    <span>
+                        <i class="fa-regular fa-circle-question"></i>
+                        @module.QuizQuestions.Count quizfrågor
+                    </span>
+                </div>
+
+                <div class="module-card-links">
+                    <button class="secondary-button" @onclick='() => Nav.NavigateTo("/admin/quiz")'>
+                        Hantera quiz
+                    </button>
+                </div>
             }
             <div class="sections-area"> 
                 <h3>Innehållssektioner</h3>
@@ -149,7 +149,11 @@ else
 
                 @if (openSectionFormId == module.ModuleId)
                 {
-
+                @if (!string.IsNullOrWhiteSpace(sectionMessage))
+                {
+                    <p class="admin-message">@sectionMessage</p>
+                }
+                
                 <div class="section-form">
                     <div class="form-group">
                         <label>Titel</label>
@@ -179,7 +183,8 @@ else
     private Module newModule = new();
     private int? editingModuleId;
     private Module editModule = new();
-    private string? message;
+    private string? moduleMessage;
+    private string? sectionMessage;
     private bool showCreateForm = false;
     private int? openSectionFormId;
 
@@ -221,7 +226,7 @@ else
     {
         if (string.IsNullOrWhiteSpace(newModule.Title))
         {
-            message = "Titel måste anges.";
+            moduleMessage = "Titel måste anges.";
             return;
         }
 
@@ -240,7 +245,7 @@ else
 
         newModule = new Module();
         showCreateForm = false;
-        message = "Modulen skapades.";
+        moduleMessage = "Modulen skapades.";
 
         await LoadModules();
     }
@@ -266,13 +271,13 @@ else
 
         if (module is null)
         {
-            message = "Modulen kunde inte hittas.";
+            moduleMessage = "Modulen kunde inte hittas.";
             return;
         }
 
         if (string.IsNullOrWhiteSpace(editModule.Title))
         {
-            message = "Titel måste anges.";
+            moduleMessage = "Titel måste anges.";
             return;
         }
 
@@ -284,7 +289,7 @@ else
 
         editingModuleId = null;
         editModule = new Module();
-        message = "Modulen uppdaterades.";
+        moduleMessage = "Modulen uppdaterades.";
 
         await LoadModules();
     }
@@ -305,7 +310,7 @@ else
 
         if (module is null)
         {
-            message = "Modulen kunde inte hittas.";
+            moduleMessage = "Modulen kunde inte hittas.";
             return;
         }
 
@@ -317,7 +322,7 @@ else
         Db.Modules.Remove(module);
         await Db.SaveChangesAsync();
 
-        message = "Modulen och dess sektioner togs bort.";
+        moduleMessage = "Modulen och dess sektioner togs bort.";
         await LoadModules();
     }
 
@@ -345,7 +350,7 @@ else
 
             if (string.IsNullOrWhiteSpace(form.Title) || string.IsNullOrWhiteSpace(form.Content))
             {
-                message = "Sektionens titel och innehåll måste anges.";
+                sectionMessage = "Sektionens titel och innehåll måste anges.";
                 return;
             }
 
@@ -365,10 +370,8 @@ else
             await Db.SaveChangesAsync();
 
             newSections[moduleId] = new NewSectionModel();
-            message = "Sektionen skapades.";
+            sectionMessage = "Sektionen skapades.";
 
             await LoadModules();
         }
-
-
 }
