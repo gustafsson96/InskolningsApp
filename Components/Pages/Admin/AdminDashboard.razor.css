@@ -1,0 +1,104 @@
+.admin-dashboard {
+    max-width: 1200px;
+}
+
+.admin-dashboard h1 {
+    margin-bottom: 0.25em;
+}
+
+.admin-dashboard-intro {
+    color: #667085;
+    font-size: 1.1em;
+    margin-bottom: 2em;
+}
+
+.admin-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25em;
+    margin-bottom: 2em;
+}
+
+.admin-stat-card,
+.admin-action-card {
+    background: white;
+    border: 1px solid #e4e7ec;
+    border-radius: 20px;
+    padding: 1.5em;
+}
+
+.admin-stat-card p {
+    margin: 0 0 0.75em 0;
+    color: #667085;
+}
+
+.admin-stat-card h2 {
+    margin: 0;
+    font-size: 2.2em;
+}
+
+.admin-stat-card h2.green {
+    color: #16a34a;
+}
+
+.admin-stat-card h2.blue {
+    color: #2563eb;
+}
+
+.admin-action-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5em;
+}
+
+.admin-action-card h2 {
+    margin-top: 0;
+}
+
+.admin-action-card p {
+    color: #667085;
+}
+
+.admin-action-card button {
+    width: 100%;
+    padding: 0.9em 1em;
+    margin-top: 0.75em;
+    border: 1px solid #d0d5dd;
+    border-radius: 12px;
+    background: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.admin-action-card button.primary {
+    background: #030014;
+    color: white;
+    border-color: #030014;
+}
+
+.admin-card-summary {
+    margin-top: 1em;
+    padding: 1em;
+    border-radius: 14px;
+    background: #f9fafb;
+}
+
+.admin-card-summary p {
+    margin: 0.25em 0;
+}
+
+@media (max-width: 1000px) {
+    .admin-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .admin-action-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .admin-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}

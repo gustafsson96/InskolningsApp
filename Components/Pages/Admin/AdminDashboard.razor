@@ -1,0 +1,155 @@
+@page "/admin"
+@layout AdminLayout
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using OnboardingApp.Data
+@using OnboardingApp.Models
+@attribute [Authorize(Roles = "Admin")]
+@inject ApplicationDbContext Db
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager Nav
+
+@if (isLoading)
+{
+    <p>Laddar adminöversikt...</p>
+}
+else
+{
+    <div class="admin-dashboard">
+        <h1>Adminöversikt</h1>
+        <p class="admin-dashboard-intro">
+            Hantera introduktionsinnehåll och följ personalens framsteg.
+        </p>
+
+        <section class="admin-stats-grid">
+            <div class="admin-stat-card">
+                <p>Totalt antal användare</p>
+                <h2>@totalUsers</h2>
+            </div>
+
+            <div class="admin-stat-card">
+                <p>Anställd personal</p>
+                <h2 class="blue">@employeeUsers</h2>
+            </div>
+
+            <div class="admin-stat-card">
+                <p>Slutförda inskolningar</p>
+                <h2 class="green">@completedIntroductions</h2>
+            </div>
+
+            <div class="admin-stat-card">
+                <p>Utbildningsmoduler</p>
+                <h2>@totalModules</h2>
+            </div>
+        </section>
+
+        <section class="admin-action-grid">
+            <div class="admin-action-card">
+                <h2>Hantera innehåll</h2>
+                <p>Redigera checklistan, moduler och quiz.</p>
+
+                <button @onclick='() => Nav.NavigateTo("/admin/checklista")'>
+                    Checklista
+                </button>
+
+                <button @onclick='() => Nav.NavigateTo("/admin/moduler")'>
+                    Moduler
+                </button>
+
+                <button @onclick='() => Nav.NavigateTo("/admin/quiz")'>
+                    Quiz
+                </button>
+
+                <div class="admin-card-summary">
+                    <p><strong>@totalModules</strong> moduler</p>
+                    <p><strong>@totalChecklistItems</strong> checklistpunkter</p>
+                </div>
+            </div>
+
+            <div class="admin-action-card">
+                <h2>Hantera användare</h2>
+                <p>Skapa nya användare och uppdatera deras uppgifter.</p>
+
+                <button class="primary" @onclick='() => Nav.NavigateTo("/admin/anvandare")'>
+                    Visa alla användare
+                </button>
+
+                <div class="admin-card-summary">
+                    <p><strong>@adminUsers</strong> administratörer</p>
+                    <p><strong>@employeeUsers</strong> anställda</p>
+                </div>
+            </div>
+        </section>
+    </div>
+}
+
+@code {
+    // Controls loading state while dashboard data is fetched
+    private bool isLoading = true;
+
+    // User statistics
+    private int totalUsers;
+    private int adminUsers;
+    private int employeeUsers;
+
+    // Content statistics
+    private int totalModules;
+    private int totalChecklistItems;
+
+    // Number of employees who have completed all modules
+    private int completedIntroductions;
+
+    // Runs when the admin dashboard loads
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDashboardData();
+        isLoading = false;
+    }
+
+    // Loads all statistics used on the admin overview page
+    private async Task LoadDashboardData()
+    {
+        // Count content
+        totalModules = await Db.Modules.CountAsync();
+        totalChecklistItems = await Db.ChecklistItems.CountAsync();
+
+        // Load users from Identity
+        var users = UserManager.Users.ToList();
+
+        totalUsers = users.Count;
+
+        // Count users by role
+        foreach (var user in users)
+        {
+            if (await UserManager.IsInRoleAsync(user, "Admin"))
+            {
+                adminUsers++;
+            }
+
+            if (await UserManager.IsInRoleAsync(user, "Employee"))
+            {
+                employeeUsers++;
+            }
+        }
+
+        // Count employees who have completed all modules
+        foreach (var user in users)
+        {
+            bool isEmployee = await UserManager.IsInRoleAsync(user, "Employee");
+
+            if (!isEmployee)
+            {
+                continue;
+            }
+
+            int completedModulesForUser = await Db.UserModuleProgresses
+                .CountAsync(p => p.UserId == user.Id && p.IsCompleted);
+
+            if (totalModules > 0 && completedModulesForUser == totalModules)
+            {
+                completedIntroductions++;
+            }
+        }
+    }
+}
