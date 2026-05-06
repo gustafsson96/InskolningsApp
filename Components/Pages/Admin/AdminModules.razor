@@ -6,34 +6,47 @@
 @using OnboardingApp.Models
 @attribute [Authorize(Roles = "Admin")]
 @inject ApplicationDbContext Db
+@inject NavigationManager Nav
 
-<h1>Hantera moduler</h1>
-<p>Endast administratörer kan visa denna sida.</p>
+<div class="admin-modules-page">
+    <div class="admin-page-header">
+        <div>
+            <h1>Hantera moduler</h1>
+            <p>Endast administratörer kan visa denna sida.</p>
+        </div>
+
+        <button class="primary-button" @onclick="ToggleCreateForm">
+            <i class="fa-solid fa-plus"></i>
+            Ny modul
+        </button>
+    </div>  
 
 @if (!string.IsNullOrWhiteSpace(message))
 {
-    <p>@message</p>
+    <p class="admin-message">@message</p>
 }
 
-<h2>Skapa ny modul</h2>
+@if (showCreateForm)
+{
+    <section class="module-form-card">
+    <h2>Skapa ny modul</h2>
 
-<div>
-    <div>
-        <label for="title">Titel</label><br />
-        <input id="title" @bind="newModule.Title" />
-    </div>
+            <div class="form-group">
+                <label for="title">Titel</label><br />
+                <input id="title" @bind="newModule.Title" />
+            </div>
 
-    <div>
-        <label for="description">Beskrivning</label><br />
-        <textarea id="description" @bind="newModule.Description"></textarea>
-    </div>
+            <div class="form-group">
+                <label for="description">Beskrivning</label><br />
+                <textarea id="description" @bind="newModule.Description"></textarea>
+            </div>
 
-    <button @onclick="CreateModule">Skapa modul</button>
-</div>
-
-<hr />
-
-<h2>Befintliga moduler</h2>
+            <div class="form-actions">
+                <button class="primary-button" @onclick="CreateModule">Skapa modul</button>
+                <button class="secondary-button" @onclick="ToggleCreateForm">Avbryt</button>
+            </div>
+    </section>
+}
 
 @if (modules.Count == 0)
 {
@@ -41,39 +54,70 @@
 }
 else
 {
+    <div class="module-list">
     @foreach (var module in modules)
     {
         var sectionForm = GetSectionForm(module.ModuleId);
 
-        <div style="border:1px solid #ccc; padding:1em; margin-bottom:1em;">
+        <div class="module-admin-card">
             @if (editingModuleId == module.ModuleId)
             {
-                <div>
-                    <label>Titel</label><br />
-                    <input @bind="editModule.Title" />
-                </div>
+                <div class="edit-module-form">
+                    <div class="form-group">
+                        <label>Titel</label><br />
+                        <input @bind="editModule.Title" />
+                    </div>
 
-                <div>
-                    <label>Beskrivning</label><br />
-                    <textarea @bind="editModule.Description"></textarea>
-                </div>
+                    <div class="form-group">
+                        <label>Beskrivning</label><br />
+                        <textarea @bind="editModule.Description"></textarea>
+                    </div>
 
-                <div style="margin-top:0.5em;">
-                    <button @onclick="SaveEdit">Spara</button>
-                    <button @onclick="CancelEdit">Avbryt</button>
+                    <div class="form-actions">
+                        <button class="primary-button" @onclick="SaveEdit">Spara</button>
+                        <button class="secondary-button" @onclick="CancelEdit">Avbryt</button>
+                    </div>
                 </div>
             }
             else
             {
-                <h3>@module.Title</h3>
-                <p>@module.Description</p>
-                <p><strong>Ordning:</strong> @module.OrderIndex</p>
+                    <div class="module-card-top">
+                        <div class="module-title-row">
+                            <span class="module-order">@module.OrderIndex</span>
+                                <div>
+                                <h2>@module.Title</h2>
+                                <p>@module.Description</p>
+                            </div>
+                        </div>
+                        <div class="module-actions">
+                            <button class="icon-button" title="Redigera" @onclick="() => StartEdit(module)">
+                                <i class="fa-regular fa-pen-to-square"></i>
+                            </button>
 
-                <button @onclick="() => StartEdit(module)">Redigera modul</button>
-                <button @onclick="() => DeleteModule(module.ModuleId)">Ta bort modul</button>
+                            <button class="icon-button danger" title="Ta bort" @onclick="() => DeleteModule(module.ModuleId)">
+                                    <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="module-meta">
+                       <span>
+                            <i class="fa-regular fa-file-lines"></i>
+                                @module.Sections.Count sektioner
+                        </span>
+
+                        <span>
+                            <i class="fa-regular fa-circle-question"></i>
+                            @module.QuizQuestions.Count quizfrågor
+                        </span>
+                    </div>
+
+                    <div class="module-card-links">
+                        <button class="secondary-button" @onclick='() => Nav.NavigateTo("/admin/quiz")'>
+                            Hantera quiz
+                        </button>
+                    </div>
             }
-
-            <hr />
 
             <h4>Sektioner</h4>
 
@@ -111,7 +155,9 @@ else
             </div>
         </div>
     }
+    </div>
 }
+</div>
 
 @code {
     private List<Module> modules = new();
@@ -119,6 +165,7 @@ else
     private int? editingModuleId;
     private Module editModule = new();
     private string? message;
+    private bool showCreateForm = false;
 
     // View model for a new section
     private class NewSectionModel
@@ -143,6 +190,13 @@ else
             .Include(m => m.Sections)
             .OrderBy(m => m.OrderIndex)
             .ToListAsync();
+    }
+
+    // Show or hide create module form
+    private void ToggleCreateForm()
+    {
+        showCreateForm = !showCreateForm;
+        newModule = new Module();
     }
 
     // Create module
