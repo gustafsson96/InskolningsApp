@@ -1,5 +1,235 @@
 @page "/admin/anvandare"
 @layout AdminLayout
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using OnboardingApp.Models
+@attribute [Authorize(Roles = "Admin")]
 
-<h1>Användarhantering</h1>
-<p>Här hanteras användare från admingränssnittet.</p>
+@inject UserManager<ApplicationUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
+
+<h1>Hantera användare</h1>
+<p>Här kan administratörer skapa användare och hantera deras uppgifter.</p>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p>@message</p>
+}
+
+<section style="border:1px solid #ccc; padding:1em; margin-bottom:1.5em;">
+    <h2>Skapa ny användare</h2>
+
+    <div>
+        <label>Förnamn</label><br />
+        <input @bind="newUser.FirstName" />
+    </div>
+
+    <div style="margin-top:0.5em;">
+        <label>Efternamn</label><br />
+        <input @bind="newUser.LastName" />
+    </div>
+
+    <div style="margin-top:0.5em;">
+        <label>E-post</label><br />
+        <input @bind="newUser.Email" />
+    </div>
+
+    <div style="margin-top:0.5em;">
+        <label>Startdatum</label><br />
+        <input type="date" @bind="newUser.Startdate" />
+    </div>
+
+    <div style="margin-top:0.5em;">
+        <label>Roll</label><br />
+        <select @bind="newUser.Role">
+            <option value="Employee">Employee</option>
+            <option value="Admin">Admin</option>
+        </select>
+    </div>
+
+    <div style="margin-top:0.5em;">
+        <label>Lösenord</label><br />
+        <input type="password" @bind="newUser.Password" />
+    </div>
+
+    <div style="margin-top:0.75em;">
+        <button @onclick="CreateUser">Skapa användare</button>
+    </div>
+</section>
+
+@code {
+    // Stores users from Identity
+    private List<ApplicationUser> users = new();
+
+    // Feedback message shown after create/update/delete
+    private string? message;
+
+    // Form model used when creating a new user
+    private UserFormModel newUser = new();
+
+    // Stores edit form data for each user
+    private Dictionary<string, UserFormModel> editForms = new();
+
+    // Form model for create and edit
+    private class UserFormModel
+    {
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public DateTime? Startdate { get; set; }
+        public string Role { get; set; } = "Employee";
+        public string Password { get; set; } = string.Empty;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    // Loads all users and prepares edit forms
+    private async Task LoadUsers()
+    {
+        users = UserManager.Users
+            .OrderBy(u => u.FirstName)
+            .ThenBy(u => u.LastName)
+            .ToList();
+
+        editForms.Clear();
+
+        foreach (var user in users)
+        {
+            var roles = await UserManager.GetRolesAsync(user);
+
+            editForms[user.Id] = new UserFormModel
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email ?? string.Empty,
+                Startdate = user.Startdate,
+                Role = roles.FirstOrDefault() ?? "Employee"
+            };
+        }
+    }
+
+    // Returns the edit form for a selected user
+    private UserFormModel GetEditForm(string userId)
+    {
+        if (!editForms.ContainsKey(userId))
+        {
+            editForms[userId] = new UserFormModel();
+        }
+
+        return editForms[userId];
+    }
+
+    // Creates a new Identity user and assigns selected role
+    private async Task CreateUser()
+    {
+        if (string.IsNullOrWhiteSpace(newUser.FirstName) ||
+            string.IsNullOrWhiteSpace(newUser.LastName) ||
+            string.IsNullOrWhiteSpace(newUser.Email) ||
+            string.IsNullOrWhiteSpace(newUser.Password))
+        {
+            message = "Förnamn, efternamn, e-post och lösenord måste anges.";
+            return;
+        }
+
+        var user = new ApplicationUser
+        {
+            UserName = newUser.Email,
+            Email = newUser.Email,
+            EmailConfirmed = true,
+            FirstName = newUser.FirstName,
+            LastName = newUser.LastName,
+            Startdate = newUser.Startdate
+        };
+
+        var result = await UserManager.CreateAsync(user, newUser.Password);
+
+        if (!result.Succeeded)
+        {
+            message = string.Join(" ", result.Errors.Select(e => e.Description));
+            return;
+        }
+
+        await UserManager.AddToRoleAsync(user, newUser.Role);
+
+        newUser = new UserFormModel();
+        message = "Användaren skapades.";
+
+        await LoadUsers();
+    }
+
+    // Updates user details and role
+    private async Task UpdateUser(string userId)
+    {
+        var form = GetEditForm(userId);
+
+        if (string.IsNullOrWhiteSpace(form.FirstName) ||
+            string.IsNullOrWhiteSpace(form.LastName) ||
+            string.IsNullOrWhiteSpace(form.Email))
+        {
+            message = "Förnamn, efternamn och e-post måste anges.";
+            return;
+        }
+
+        var user = await UserManager.FindByIdAsync(userId);
+
+        if (user is null)
+        {
+            message = "Användaren kunde inte hittas.";
+            return;
+        }
+
+        user.FirstName = form.FirstName;
+        user.LastName = form.LastName;
+        user.Email = form.Email;
+        user.UserName = form.Email;
+        user.Startdate = form.Startdate;
+
+        var updateResult = await UserManager.UpdateAsync(user);
+
+        if (!updateResult.Succeeded)
+        {
+            message = string.Join(" ", updateResult.Errors.Select(e => e.Description));
+            return;
+        }
+
+        var currentRoles = await UserManager.GetRolesAsync(user);
+
+        if (currentRoles.Any())
+        {
+            await UserManager.RemoveFromRolesAsync(user, currentRoles);
+        }
+
+        await UserManager.AddToRoleAsync(user, form.Role);
+
+        message = "Användaren uppdaterades.";
+
+        await LoadUsers();
+    }
+
+    // Deletes a user from Identity
+    private async Task DeleteUser(string userId)
+    {
+        var user = await UserManager.FindByIdAsync(userId);
+
+        if (user is null)
+        {
+            message = "Användaren kunde inte hittas.";
+            return;
+        }
+
+        var result = await UserManager.DeleteAsync(user);
+
+        if (!result.Succeeded)
+        {
+            message = string.Join(" ", result.Errors.Select(e => e.Description));
+            return;
+        }
+
+        message = "Användaren togs bort.";
+
+        await LoadUsers();
+    }
+}
