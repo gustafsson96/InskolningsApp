@@ -7,115 +7,128 @@
 @attribute [Authorize(Roles = "Admin")]
 @inject ApplicationDbContext Db
 
-<h1>Hantera quiz</h1>
-<p>Här kan administratörer skapa frågor och svarsalternativ för varje modul.</p>
-
-@if (!string.IsNullOrWhiteSpace(message))
-{
-    <p>@message</p>
-}
-
-@if (modules.Count == 0)
-{
-    <p>Det finns inga moduler ännu.</p>
-}
-else
-{
-    @foreach (var module in modules)
-    {
-        var questionForm = GetQuestionForm(module.ModuleId);
-
-        <div style="border:1px solid #ccc; padding:1em; margin-bottom:1.5em;">
-            <h2>@module.Title</h2>
-            <p>@module.Description</p>
-
-            <h3>Befintliga frågor</h3>
-
-            @if (module.QuizQuestions == null || !module.QuizQuestions.Any())
-            {
-                <p>Inga frågor ännu.</p>
-            }
-            else
-            {
-                @foreach (var question in module.QuizQuestions.OrderBy(q => q.OrderIndex))
-                {
-                    var optionForm = GetOptionForm(question.QuizQuestionId);
-
-                    <div style="border:1px solid #ddd; padding:1em; margin-bottom:1em;">
-                        <p>
-                            <strong>Fråga @question.OrderIndex:</strong>
-                            @question.QuestionText
-                        </p>
-
-                        <button @onclick="() => DeleteQuestion(question.QuizQuestionId)">
-                            Ta bort fråga
-                        </button>
-
-                        <h4>Svarsalternativ</h4>
-
-                        @if (question.Options == null || !question.Options.Any())
-                        {
-                            <p>Inga svarsalternativ ännu.</p>
-                        }
-                        else
-                        {
-                            <ul>
-                                @foreach (var option in question.Options)
-                                {
-                                    <li>
-                                        @option.OptionText
-                                        @if (option.IsCorrect)
-                                        {
-                                            <strong>(Rätt svar)</strong>
-                                        }
-
-                                        <button @onclick="() => DeleteOption(option.QuizOptionId)">
-                                            Ta bort
-                                        </button>
-                                    </li>
-                                }
-                            </ul>
-                        }
-
-                        <h4>Lägg till svarsalternativ</h4>
-
-                        <div>
-                            <label>Svarstext</label><br />
-                            <input @bind="optionForm.OptionText" />
-                        </div>
-
-                        <div style="margin-top:0.5em;">
-                            <label>
-                                <input type="checkbox" @bind="optionForm.IsCorrect" />
-                                Rätt svar
-                            </label>
-                        </div>
-
-                        <div style="margin-top:0.5em;">
-                            <button @onclick="() => CreateOption(question.QuizQuestionId)">
-                                Lägg till svarsalternativ
-                            </button>
-                        </div>
-                    </div>
-                }
-            }
-
-            <h3>Skapa ny fråga</h3>
-
-            <div>
-                <label>Frågetext</label><br />
-                <textarea @bind="questionForm.QuestionText"></textarea>
-            </div>
-
-            <div style="margin-top:0.5em;">
-                <button @onclick="() => CreateQuestion(module.ModuleId)">
-                    Lägg till fråga
-                </button>
-            </div>
+<div class="admin-quiz-page">
+    <div class="admin-page-header">
+        <div>
+            <h1>Hantera quiz</h1>
+            <p>Här kan administratörer skapa frågor och svarsalternativ för varje modul.</p>
         </div>
-    }
-}
+    </div>
 
+    @if (!string.IsNullOrWhiteSpace(message))
+    {
+        <p class="admin-message">@message</p>
+    }
+
+    @if (modules.Count == 0)
+    {
+        <p>Det finns inga moduler ännu.</p>
+    }
+    else
+    {
+        @foreach (var module in modules)
+        {
+            var questionForm = GetQuestionForm(module.ModuleId);
+
+            <section class="quiz-module-card">
+                <h2>@module.Title</h2>
+                <p>@module.Description</p>
+
+                <h3>Befintliga frågor</h3>
+
+                @if (module.QuizQuestions == null || !module.QuizQuestions.Any())
+                {
+                    <p>Inga frågor ännu.</p>
+                }
+                else
+                {
+                    @foreach (var question in module.QuizQuestions.OrderBy(q => q.OrderIndex))
+                    {
+                        var optionForm = GetOptionForm(question.QuizQuestionId);
+
+                        <div class="quiz-question-card">
+                            <p>
+                                <strong>Fråga @question.OrderIndex:</strong>
+                                @question.QuestionText
+                            </p>
+
+                            <button @onclick="() => DeleteQuestion(question.QuizQuestionId)">
+                                Ta bort fråga
+                            </button>
+
+                            <h4>Svarsalternativ</h4>
+
+                            @if (question.Options == null || !question.Options.Any())
+                            {
+                                <p>Inga svarsalternativ ännu.</p>
+                            }
+                            else
+                            {
+                                <ul>
+                                    @foreach (var option in question.Options)
+                                    {
+                                        <li>
+                                            @option.OptionText
+                                            @if (option.IsCorrect)
+                                            {
+                                                <strong>(Rätt svar)</strong>
+                                            }
+
+                                            <button @onclick="() => DeleteOption(option.QuizOptionId)">
+                                                Ta bort
+                                            </button>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+
+                            @if (question.Options.Count >= 4)
+                            {
+                                <p class="empty-text">
+                                    Max antal svarsalternativ uppnått.
+                                </p>
+                            }
+                            else
+                            {
+                            <h4>Lägg till svarsalternativ</h4>
+
+                            <div>
+                                <label>Svarstext</label><br />
+                                <input @bind="optionForm.OptionText" />
+                            </div>
+
+                            <div class="form-small-space">
+                                <label>
+                                    <input type="checkbox" @bind="optionForm.IsCorrect" />
+                                    Rätt svar
+                                </label>
+                            </div>
+
+                            <div class="form-small-space">
+                                <button @onclick="() => CreateOption(question.QuizQuestionId)">
+                                    Lägg till svarsalternativ
+                                </button>
+                            </div>
+                            }
+                        </div>
+                    }
+                }
+                <h3>Skapa ny fråga</h3>
+
+                <div>
+                    <label>Frågetext</label><br />
+                    <textarea @bind="questionForm.QuestionText"></textarea>
+                </div>
+
+                <div class="form-small-space">
+                    <button @onclick="() => CreateQuestion(module.ModuleId)">
+                        Lägg till fråga
+                    </button>
+                </div>
+            </section>
+        }
+    }
+</div>
 @code {
     private List<Module> modules = new();
     private string? message;
@@ -229,6 +242,15 @@ else
         if (string.IsNullOrWhiteSpace(form.OptionText))
         {
             message = "Svarstext måste anges.";
+            return;
+        }
+
+        // Limit to 4 options per question
+        int optionCount = await Db.QuizOptions.CountAsync(o => o.QuizQuestionId == questionId);
+
+        if (optionCount >= 4)
+        {
+            message = "En fråga kan maximalt ha 4 svarsalternativ.";
             return;
         }
 

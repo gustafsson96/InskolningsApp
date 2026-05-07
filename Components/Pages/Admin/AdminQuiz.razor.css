@@ -1,0 +1,138 @@
+.admin-quiz-page {
+    max-width: 1200px;
+}
+
+.admin-page-header {
+    margin-bottom: 2em;
+}
+
+.admin-page-header h1 {
+    margin: 0 0 0.25em 0;
+    font-size: 2.5em;
+}
+
+.admin-page-header p {
+    margin: 0;
+    color: #667085;
+    font-size: 1.1em;
+}
+
+.admin-message {
+    background: #f9fafb;
+    border: 1px solid #e4e7ec;
+    border-radius: 12px;
+    padding: 1em;
+    margin-bottom: 1.5em;
+}
+
+.quiz-module-card {
+    background: white;
+    border: 1px solid #e4e7ec;
+    border-radius: 20px;
+    padding: 1.5em;
+    margin-bottom: 1.5em;
+}
+
+.quiz-module-card h2 {
+    margin: 0 0 0.35em 0;
+    font-size: 1.5em;
+}
+
+.quiz-module-card > p {
+    margin: 0 0 1.5em 0;
+    color: #667085;
+}
+
+.quiz-module-card h3 {
+    margin: 1.5em 0 0.75em 0;
+    font-size: 1.15em;
+}
+
+.quiz-question-card {
+    background: #f9fafb;
+    border: 1px solid #e4e7ec;
+    border-radius: 16px;
+    padding: 1.25em;
+    margin-bottom: 1em;
+}
+
+.quiz-question-card p {
+    margin-top: 0;
+}
+
+.quiz-question-card h4 {
+    margin: 1.25em 0 0.75em 0;
+}
+
+.quiz-question-card ul {
+    margin: 0;
+    padding-left: 1.25em;
+}
+
+.quiz-question-card li {
+    margin-bottom: 0.75em;
+}
+
+.form-group {
+    margin-bottom: 1em;
+}
+
+.form-group label,
+.quiz-question-card label {
+    display: block;
+    margin-bottom: 0.35em;
+    font-weight: 600;
+    color: #344054;
+}
+
+input,
+textarea {
+    width: 100%;
+    border: 1px solid #d0d5dd;
+    border-radius: 12px;
+    padding: 0.8em 1em;
+    font: inherit;
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+button {
+    border: 1px solid #d0d5dd;
+    border-radius: 12px;
+    background: white;
+    color: #101828;
+    padding: 0.1em 0.8em;
+    margin-left: 0.8em;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #f9fafb;
+}
+
+.quiz-question-card button {
+    margin-top: 0.5em;
+}
+
+.form-small-space {
+    margin-top: 0.75em;
+}
+
+input[type="checkbox"] {
+    width: auto;
+    margin-right: 0.5em;
+}
+
+@media (max-width: 700px) {
+    .admin-page-header h1 {
+        font-size: 2em;
+    }
+
+    .quiz-module-card {
+        padding: 1.25em;
+    }
+}
