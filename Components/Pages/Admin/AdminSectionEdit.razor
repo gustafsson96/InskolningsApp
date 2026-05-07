@@ -1,0 +1,9 @@
+@page "/admin/sektioner/{SectionId:int}"
+@layout AdminLayout
+
+<h1>En sektionssida</h1>
+
+@code {
+    [Parameter]
+    public int SectionId { get; set; }
+}

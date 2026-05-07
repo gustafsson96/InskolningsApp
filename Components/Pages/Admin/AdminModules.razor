@@ -19,17 +19,17 @@
             <i class="fa-solid fa-plus"></i>
             Ny modul
         </button>
-    </div>  
+    </div>
 
-@if (!string.IsNullOrWhiteSpace(moduleMessage))
-{
-    <p class="admin-message">@moduleMessage</p>
-}
+    @if (!string.IsNullOrWhiteSpace(moduleMessage))
+    {
+        <p class="admin-message">@moduleMessage</p>
+    }
 
-@if (showCreateForm)
-{
-    <section class="admin-form-card">
-    <h2>Skapa ny modul</h2>
+    @if (showCreateForm)
+    {
+        <section class="admin-form-card">
+            <h2>Skapa ny modul</h2>
 
             <div class="form-group">
                 <label for="title">Titel</label><br />
@@ -45,137 +45,148 @@
                 <button class="primary-button" @onclick="CreateModule">Skapa modul</button>
                 <button class="secondary-button" @onclick="ToggleCreateForm">Avbryt</button>
             </div>
-    </section>
-}
+        </section>
+    }
 
-@if (modules.Count == 0)
-{
-    <p>Det finns inga moduler ännu.</p>
-}
-else
-{
-    <div class="module-list">
-    @foreach (var module in modules)
+    @if (modules.Count == 0)
     {
-        var sectionForm = GetSectionForm(module.ModuleId);
-
-        <div class="module-admin-card">
-            @if (editingModuleId == module.ModuleId)
+        <p>Det finns inga moduler ännu.</p>
+    }
+    else
+    {
+        <div class="module-list">
+            @foreach (var module in modules)
             {
-                <div class="edit-module-form">
-                    <div class="form-group">
-                        <label>Titel</label>
-                        <input @bind="editModule.Title" />
-                    </div>
+                var sectionForm = GetSectionForm(module.ModuleId);
 
-                    <div class="form-group">
-                        <label>Beskrivning</label>
-                        <textarea @bind="editModule.Description"></textarea>
-                    </div>
-
-                    <div class="form-actions">
-                        <button class="primary-button" @onclick="SaveEdit">Spara</button>
-                        <button class="secondary-button" @onclick="CancelEdit">Avbryt</button>
-                    </div>
-                </div>
-            }
-            else
-            {
-                <div class="module-card-top">
-                    <div class="module-title-row">
-                        <span class="module-order">@module.OrderIndex</span>
-                            <div>
-                            <h2>@module.Title</h2>
-                            <p>@module.Description</p>
-                        </div>
-                    </div>
-                    <div class="module-actions">
-                        <button class="icon-button" title="Redigera" @onclick="() => StartEdit(module)">
-                            <i class="fa-regular fa-pen-to-square"></i>
-                        </button>
-
-                        <button class="icon-button danger" title="Ta bort" @onclick="() => DeleteModule(module.ModuleId)">
-                                <i class="fa-regular fa-trash-can"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="module-meta">
-                    <span>
-                        <i class="fa-regular fa-file-lines"></i>
-                            @module.Sections.Count sektioner
-                    </span>
-
-                    <span>
-                        <i class="fa-regular fa-circle-question"></i>
-                        @module.QuizQuestions.Count quizfrågor
-                    </span>
-                </div>
-
-                <div class="module-card-links">
-                    <button class="secondary-button" @onclick='() => Nav.NavigateTo("/admin/quiz")'>
-                        Hantera quiz
-                    </button>
-                </div>
-            }
-            <div class="sections-area"> 
-                <h3>Innehållssektioner</h3>
-
-            @if (module.Sections == null || !module.Sections.Any())
-            {
-                <p class="empty-text">Inga sektioner ännu.</p>
-            }
-            else
-            {
-                <div class="section-list">
-                    @foreach (var moduleSection in module.Sections.OrderBy(s => s.OrderIndex))
+                <div class="module-admin-card">
+                    @if (editingModuleId == module.ModuleId)
                     {
-                        <div class="section-item">
-                            <span>@moduleSection.OrderIndex</span>
-                            <div>
-                                <strong>@moduleSection.Title:</strong>
-                                <p>@((MarkupString)moduleSection.Content)</p>
+                        <div class="edit-module-form">
+                            <div class="form-group">
+                                <label>Titel</label>
+                                <input @bind="editModule.Title" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>Beskrivning</label>
+                                <textarea @bind="editModule.Description"></textarea>
+                            </div>
+
+                            <div class="form-actions">
+                                <button class="primary-button" @onclick="SaveEdit">Spara</button>
+                                <button class="secondary-button" @onclick="CancelEdit">Avbryt</button>
                             </div>
                         </div>
                     }
+                    else
+                    {
+                        <div class="module-card-top">
+                            <div class="module-title-row">
+                                <span class="module-order">@module.OrderIndex</span>
+                                <div>
+                                    <h2>@module.Title</h2>
+                                    <p>@module.Description</p>
+                                </div>
+                            </div>
+                            <div class="module-actions">
+                                <button class="icon-button" title="Redigera" @onclick="() => StartEdit(module)">
+                                    <i class="fa-regular fa-pen-to-square"></i>
+                                </button>
+
+                                <button class="icon-button danger" title="Ta bort" @onclick="() => DeleteModule(module.ModuleId)">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="module-meta">
+                            <span>
+                                <i class="fa-regular fa-file-lines"></i>
+                                @module.Sections.Count sektioner
+                            </span>
+
+                            <span>
+                                <i class="fa-regular fa-circle-question"></i>
+                                @module.QuizQuestions.Count quizfrågor
+                            </span>
+                        </div>
+
+                        <div class="module-card-links">
+                            <button class="secondary-button add-section-button"
+                                    @onclick="() => ToggleSectionForm(module.ModuleId)">
+                                <i class="fa-solid fa-plus"></i>
+                                Lägg till sektion
+                            </button>
+                            <button class="secondary-button" @onclick='() => Nav.NavigateTo("/admin/quiz")'>
+                                Hantera quiz
+                            </button>
+                        </div>
+                    }
+                    @if (openSectionFormId == module.ModuleId)
+                    {
+                        <div class="add-section-details">
+                            @if (!string.IsNullOrWhiteSpace(sectionMessage))
+                            {
+                                <p class="admin-message">@sectionMessage</p>
+                            }
+
+                            <div class="section-form">
+                                <div class="form-group">
+                                    <label>Titel</label>
+                                    <input @bind="sectionForm.Title" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Innehåll</label>
+                                    <textarea class="section-content-textarea" @bind="sectionForm.Content"></textarea>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button class="primary-button" @onclick="() => CreateSection(module.ModuleId)">
+                                        Spara
+                                    </button>
+
+                                    <button class="secondary-button" @onclick="() => ToggleSectionForm(module.ModuleId)">
+                                        Avbryt
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="sections-area">
+                        <div class="sections-header">
+                            <button type="button" class="text-button" @onclick="() => ToggleSections(module.ModuleId)">
+                                @(expandedSections.Contains(module.ModuleId) ? "Dölj modulens sektioner" : "Visa modulens sektioner")
+                            </button>
+                        </div>
+                        @if (expandedSections.Contains(module.ModuleId))
+                        {
+                            @if (module.Sections == null || !module.Sections.Any())
+                            {
+                                <p class="empty-text">Inga sektioner ännu.</p>
+                            }
+                            else
+                            {
+                                <div class="section-list compact">
+                                    @foreach (var moduleSection in module.Sections.OrderBy(s => s.OrderIndex))
+                                    {
+                                        <button class="section-item section-link"
+                                                @onclick="() => GoToSection(moduleSection.ModuleSectionId)">
+                                            <span>@moduleSection.OrderIndex</span>
+                                            <strong>@moduleSection.Title</strong>
+                                            <i class="fa-solid fa-chevron-right"></i>
+                                        </button>
+                                    }
+                                </div>
+                            }
+                        }
+                    </div>
                 </div>
             }
-
-            <div class="add-section-details">
-                <button class="secondary-button add-section-button" @onclick="() => ToggleSectionForm(module.ModuleId)">
-                    <i class="fa-solid fa-plus"></i>
-                    Lägg till sektion
-                </button>
-
-                @if (openSectionFormId == module.ModuleId)
-                {
-                @if (!string.IsNullOrWhiteSpace(sectionMessage))
-                {
-                    <p class="admin-message">@sectionMessage</p>
-                }
-                
-                <div class="section-form">
-                    <div class="form-group">
-                        <label>Titel</label>
-                        <input @bind="sectionForm.Title" />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Innehåll</label>
-                        <textarea @bind="sectionForm.Content"></textarea>
-                    </div>
-
-                        <button class="primary-button" @onclick="() => CreateSection(module.ModuleId)">
-                            Lägg till sektion
-                        </button>
-                    </div>
-                    }
-                </div>
-            </div>
         </div>
     }
-    </div>
-}
 </div>
 
 @code {
@@ -187,14 +198,15 @@ else
     private string? sectionMessage;
     private bool showCreateForm = false;
     private int? openSectionFormId;
+    private HashSet<int> expandedSections = new();
 
     // View model for a new section
     private class NewSectionModel
-        {
-            public string Title { get; set; } = string.Empty;
-            public string Content { get; set; } = string.Empty;
-        }
-    
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty;
+    }
+
     // Section form for each module
     private Dictionary<int, NewSectionModel> newSections = new();
 
@@ -328,14 +340,32 @@ else
 
     // Get formdata for a module
     private NewSectionModel GetSectionForm(int moduleId)
+    {
+        if (!newSections.ContainsKey(moduleId))
         {
-            if (!newSections.ContainsKey(moduleId))
-            {
-                newSections[moduleId] = new NewSectionModel();
-            }
-
-            return newSections[moduleId];
+            newSections[moduleId] = new NewSectionModel();
         }
+        return newSections[moduleId];
+    }
+
+    // Toggle sections
+    private void ToggleSections(int moduleId)
+    {
+        if (expandedSections.Contains(moduleId))
+        {
+            expandedSections.Remove(moduleId);
+        }
+        else
+        {
+            expandedSections.Add(moduleId);
+        }
+    }
+
+    // Navigate to a specific section
+    private void GoToSection(int sectionId)
+    {
+        Nav.NavigateTo($"/admin/sektioner/{sectionId}");
+    }
 
     // Open/close section from
     private void ToggleSectionForm(int moduleId)
@@ -345,33 +375,33 @@ else
 
     // Create a new section for a module
     private async Task CreateSection(int moduleId)
+    {
+        var form = GetSectionForm(moduleId);
+
+        if (string.IsNullOrWhiteSpace(form.Title) || string.IsNullOrWhiteSpace(form.Content))
         {
-            var form = GetSectionForm(moduleId);
-
-            if (string.IsNullOrWhiteSpace(form.Title) || string.IsNullOrWhiteSpace(form.Content))
-            {
-                sectionMessage = "Sektionens titel och innehåll måste anges.";
-                return;
-            }
-
-            int maxOrderIndex = await Db.ModuleSections
-                .Where(s => s.ModuleId == moduleId)
-                .MaxAsync(s => (int?)s.OrderIndex) ?? 0;
-
-            var section = new ModuleSection
-            {
-                ModuleId = moduleId,
-                Title = form.Title,
-                Content = form.Content,
-                OrderIndex = maxOrderIndex + 1
-            };
-
-            Db.ModuleSections.Add(section);
-            await Db.SaveChangesAsync();
-
-            newSections[moduleId] = new NewSectionModel();
-            sectionMessage = "Sektionen skapades.";
-
-            await LoadModules();
+            sectionMessage = "Sektionens titel och innehåll måste anges.";
+            return;
         }
+
+        int maxOrderIndex = await Db.ModuleSections
+            .Where(s => s.ModuleId == moduleId)
+            .MaxAsync(s => (int?)s.OrderIndex) ?? 0;
+
+        var section = new ModuleSection
+        {
+            ModuleId = moduleId,
+            Title = form.Title,
+            Content = form.Content,
+            OrderIndex = maxOrderIndex + 1
+        };
+
+        Db.ModuleSections.Add(section);
+        await Db.SaveChangesAsync();
+
+        newSections[moduleId] = new NewSectionModel();
+        sectionMessage = "Sektionen skapades.";
+
+        await LoadModules();
+    }
 }
