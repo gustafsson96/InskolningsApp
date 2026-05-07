@@ -1,9 +1,129 @@
 @page "/admin/sektioner/{SectionId:int}"
 @layout AdminLayout
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using OnboardingApp.Data
+@using OnboardingApp.Models
+@attribute [Authorize(Roles = "Admin")]
+@inject ApplicationDbContext Db
+@inject NavigationManager Nav
 
-<h1>En sektionssida</h1>
+<div class="admin-section-edit-page">
+    <button class="secondary-button back-button" @onclick="GoBack">
+        <i class="fa-solid fa-arrow-left"></i>
+        Tillbaka till moduler
+    </button>
+
+    @if (isLoading)
+    {
+        <p>Laddar sektion...</p>
+    }
+    else if (section is null)
+    {
+        <p>Sektionen kunde inte hittas.</p>
+    }
+    else
+    {
+        <section class="section-edit-card">
+            <h1>Sektion: @(section?.Title ?? "Sektion")</h1>
+            <p class="section-edit-subtitle">
+                Uppdatera titel och innehåll för sektionen.
+            </p>
+
+            @if (!string.IsNullOrWhiteSpace(message))
+            {
+                <p class="admin-message">@message</p>
+            }
+
+            <div class="form-group">
+                <label>Titel</label>
+                <input @bind="section.Title" />
+            </div>
+
+            <div class="form-group">
+                <label>Innehåll</label>
+                <textarea class="section-edit-textarea" @bind="section.Content"></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button class="primary-button" @onclick="SaveSection">
+                    Spara ändringar
+                </button>
+
+                <button class="secondary-button" @onclick="GoBack">
+                    Avbryt
+                </button>
+
+                <button class="secondary-button danger-button" @onclick="DeleteSection">
+                    Ta bort sektion
+                </button>
+            </div>
+        </section>
+    }
+</div>
 
 @code {
+    // Route parameter from URL
     [Parameter]
     public int SectionId { get; set; }
+
+    // Current section loaded from database
+    private ModuleSection? section;
+
+    // Loading state for page
+    private bool isLoading = true;
+
+    // Status/error message
+    private string? message;
+
+    // Load section on page load
+    protected override async Task OnInitializedAsync()
+    {
+        section = await Db.ModuleSections
+            .Include(s => s.Module)
+            .FirstOrDefaultAsync(s => s.ModuleSectionId == SectionId);
+
+        isLoading = false;
+    }
+
+    // Save changes to section
+    private async Task SaveSection()
+    {
+        if (section is null)
+        {
+            return;
+        }
+
+        // Validate required fields
+        if (string.IsNullOrWhiteSpace(section.Title) ||
+            string.IsNullOrWhiteSpace(section.Content))
+        {
+            message = "Titel och innehåll måste anges.";
+            return;
+        }
+
+        await Db.SaveChangesAsync();
+        message = "Sektionen uppdaterades.";
+    }
+
+    // Delete section
+    private async Task DeleteSection()
+    {
+        if (section is null)
+        {
+            return;
+        }
+
+        Db.ModuleSections.Remove(section);
+        await Db.SaveChangesAsync();
+
+        // Navigate back to module admin page
+        Nav.NavigateTo("/admin/moduler");
+    }
+
+    // Navigate back to module admin page
+    private void GoBack()
+    {
+        Nav.NavigateTo("/admin/moduler");
+    }
 }
