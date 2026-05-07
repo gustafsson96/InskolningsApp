@@ -1,4 +1,4 @@
-@page "/admin/quiz"
+@page "/admin/quiz/{ModuleId:int}"
 @layout AdminLayout
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
@@ -10,8 +10,7 @@
 <div class="admin-quiz-page">
     <div class="admin-page-header">
         <div>
-            <h1>Hantera quiz</h1>
-            <p>Här kan administratörer skapa frågor och svarsalternativ för varje modul.</p>
+            <h1>Hantera quiz för @module.Title-modulen</h1>
         </div>
     </div>
 
@@ -20,19 +19,30 @@
         <p class="admin-message">@message</p>
     }
 
-    @if (modules.Count == 0)
+    @if (module is null)
     {
-        <p>Det finns inga moduler ännu.</p>
+        <p>Modulen kunde inte hittas.</p>
     }
     else
     {
-        @foreach (var module in modules)
-        {
             var questionForm = GetQuestionForm(module.ModuleId);
 
             <section class="quiz-module-card">
                 <h2>@module.Title</h2>
                 <p>@module.Description</p>
+
+                                <h3>Skapa ny fråga</h3>
+
+                <div>
+                    <label>Frågetext</label><br />
+                    <textarea @bind="questionForm.QuestionText"></textarea>
+                </div>
+
+                <div class="form-small-space">
+                    <button @onclick="() => CreateQuestion(module.ModuleId)">
+                        Lägg till fråga
+                    </button>
+                </div>
 
                 <h3>Befintliga frågor</h3>
 
@@ -113,54 +123,52 @@
                         </div>
                     }
                 }
-                <h3>Skapa ny fråga</h3>
-
-                <div>
-                    <label>Frågetext</label><br />
-                    <textarea @bind="questionForm.QuestionText"></textarea>
-                </div>
-
-                <div class="form-small-space">
-                    <button @onclick="() => CreateQuestion(module.ModuleId)">
-                        Lägg till fråga
-                    </button>
-                </div>
             </section>
         }
-    }
 </div>
 @code {
-    private List<Module> modules = new();
+    // Selected module
+    private Module? module;
+
+    // Route parameter from /admin/quiz/{ModuleId}
+    [Parameter]
+    public int ModuleId { get; set; }
+    // Feedback message
     private string? message;
 
+    // Form mdoel for creating a new question
     private class NewQuestionModel
     {
         public string QuestionText { get; set; } = string.Empty;
     }
 
+    // Form model for creating a new answer option
     private class NewOptionModel
     {
         public string OptionText { get; set; } = string.Empty;
         public bool IsCorrect { get; set; }
     }
 
+    // Store question form data 
     private Dictionary<int, NewQuestionModel> newQuestions = new();
+    // Store option form data
     private Dictionary<int, NewOptionModel> newOptions = new();
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadModules();
+        await LoadModule();
     }
 
-    private async Task LoadModules()
+    // Fetch selected module with quiz questions and options
+    private async Task LoadModule()
     {
-        modules = await Db.Modules
+        module = await Db.Modules
             .Include(m => m.QuizQuestions.OrderBy(q => q.OrderIndex))
                 .ThenInclude(q => q.Options)
-            .OrderBy(m => m.OrderIndex)
-            .ToListAsync();
+            .FirstOrDefaultAsync(m => m.ModuleId == ModuleId);
     }
 
+    // Get or create question form state for a module
     private NewQuestionModel GetQuestionForm(int moduleId)
     {
         if (!newQuestions.ContainsKey(moduleId))
@@ -171,6 +179,7 @@
         return newQuestions[moduleId];
     }
 
+    // Get or create option form state for a module
     private NewOptionModel GetOptionForm(int questionId)
     {
         if (!newOptions.ContainsKey(questionId))
@@ -181,6 +190,7 @@
         return newOptions[questionId];
     }
 
+    // Create a question for the selected module
     private async Task CreateQuestion(int moduleId)
     {
         var form = GetQuestionForm(moduleId);
@@ -208,9 +218,10 @@
         newQuestions[moduleId] = new NewQuestionModel();
         message = "Frågan skapades.";
 
-        await LoadModules();
+        await LoadModule();
     }
 
+    // Delete a question and all connected answer options
     private async Task DeleteQuestion(int questionId)
     {
         var question = await Db.QuizQuestions
@@ -232,9 +243,10 @@
         await Db.SaveChangesAsync();
 
         message = "Frågan togs bort.";
-        await LoadModules();
+        await LoadModule();
     }
 
+    // Create an answer option for a question
     private async Task CreateOption(int questionId)
     {
         var form = GetOptionForm(questionId);
@@ -279,9 +291,10 @@
         newOptions[questionId] = new NewOptionModel();
         message = "Svarsalternativet skapades.";
 
-        await LoadModules();
+        await LoadModule();
     }
 
+    // Delete an answer option
     private async Task DeleteOption(int optionId)
     {
         var option = await Db.QuizOptions.FindAsync(optionId);
@@ -296,6 +309,6 @@
         await Db.SaveChangesAsync();
 
         message = "Svarsalternativet togs bort.";
-        await LoadModules();
+        await LoadModule();
     }
 }
