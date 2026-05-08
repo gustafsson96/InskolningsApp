@@ -15,37 +15,46 @@
             <p>Här kan administratörer skapa, ändra och ta bort checklistpunkter.</p>
         </div>
     </div>
+
+    <button class="primary-button" @onclick="ToggleCreateForm">
+        <i class="fa-solid fa-plus"></i>
+        Ny checklistpunkt
+    </button>
+
     @if (!string.IsNullOrWhiteSpace(message))
     {
         <p class="admin-message">@message</p>
     }
 
-    <section class="admin-form-card">
-        <h2>Skapa ny checklistpunkt</h2>
+    @if (showCreateForm)
+    {
+        <section class="admin-form-card">
+            <h2>Skapa ny checklistpunkt</h2>
 
-        <div class="form-group">
-            <label>Titel</label><br />
-            <input @bind="newItem.Title" />
-        </div>
+            <div class="form-group">
+                <label>Titel</label>
+                <input @bind="newItem.Title" />
+            </div>
 
-        <div class="form-group">
-            <label>Beskrivning</label><br />
-            <textarea @bind="newItem.Description"></textarea>
-        </div>
+            <div class="form-group">
+                <label>Beskrivning</label>
+                <textarea @bind="newItem.Description"></textarea>
+            </div>
 
-        <div class="form-group">
-            <label>Kategori</label><br />
-            <select @bind="newItem.Category">
-                <option value="">Välj kategori</option>
-                @foreach (var module in modules)
-                {
-                    <option value="@module.Title">@module.Title</option>
-                }
-            </select>
-        </div>
+            <div class="form-group">
+                <label>Kategori</label>
+                <select @bind="newItem.Category">
+                    <option value="">Välj kategori</option>
+                    @foreach (var module in modules)
+                    {
+                        <option value="@module.Title">@module.Title</option>
+                    }
+                </select>
+            </div>
 
-        <button class="primary-button" @onclick="CreateChecklistItem">Lägg till checklistpunkt</button>
-    </section>
+            <button class="primary-button" @onclick="CreateChecklistItem">Lägg till checklistpunkt</button>
+        </section>
+    }
 
     <section class="checklist-list-section">
         <h2>Befintliga checklistpunkter</h2>
@@ -81,41 +90,60 @@
                                 @(string.IsNullOrWhiteSpace(item.Category) ? "Ingen kategori" : item.Category)
                             </span>
                         </div>
+                        <div class="module-actions">
+                            <button class="icon-button" title="Redigera" type="button"
+                                    @onclick="() => ToggleEditForm(item.ChecklistItemId)">
 
-                        <div class="edit-checklist-form">
-                            <h4>Redigera checklistpunkt</h4>
+                                @if (openEditChecklistId == item.ChecklistItemId)
+                                {
+                                    <i class="fa-solid fa-xmark"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa-regular fa-pen-to-square"></i>
+                                }
+                            </button>
 
-                            <div class="form-group">
-                                <label>Titel</label>
-                                <input @bind="editForm.Title" />
-                            </div>
+                            <button class="icon-button danger" title="Ta bort" type="button"
+                                    @onclick="() => DeleteChecklistItem(item.ChecklistItemId)">
 
-                            <div class="form-group">
-                                <label>Beskrivning</label>
-                                <textarea @bind="editForm.Description"></textarea>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Kategori</label>
-                                <select @bind="editForm.Category">
-                                    <option value="">Välj kategori</option>
-                                    @foreach (var module in modules)
-                                    {
-                                        <option value="@module.Title">@module.Title</option>
-                                    }
-                                </select>
-                            </div>
-
-                            <div class="form-actions">
-                                <button class="secondary-button" @onclick="() => UpdateChecklistItem(item.ChecklistItemId)">
-                                    Spara ändringar
-                                </button>
-
-                                <button class="secondary-button" @onclick="() => DeleteChecklistItem(item.ChecklistItemId)">
-                                    Ta bort
-                                </button>
-                            </div>
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
                         </div>
+                        
+                        @if (openEditChecklistId == item.ChecklistItemId)
+                        {
+                            <div class="edit-checklist-form">
+                                <h4>Redigera checklistpunkt</h4>
+
+                                <div class="form-group">
+                                    <label>Titel</label>
+                                    <input @bind="editForm.Title" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Beskrivning</label>
+                                    <textarea @bind="editForm.Description"></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Kategori</label>
+                                    <select @bind="editForm.Category">
+                                        <option value="">Välj kategori</option>
+                                        @foreach (var module in modules)
+                                        {
+                                            <option value="@module.Title">@module.Title</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button class="secondary-button" @onclick="() => UpdateChecklistItem(item.ChecklistItemId)">
+                                        Spara ändringar
+                                    </button>
+                                </div>
+                            </div>
+                        }
                     </article>
                 }
             </div>
@@ -137,6 +165,10 @@
 
     // Stores edit forms per checklist item
     private Dictionary<int, ChecklistFormModel> editForms = new();
+
+    // State of create form
+    private bool showCreateForm = false;
+    private int? openEditChecklistId;
 
     // Simple form model used for both create and edit operations
     private class ChecklistFormModel
@@ -310,5 +342,24 @@
         message = "Checklistpunkten togs bort.";
 
         await LoadData();
+    }
+
+    // Toggle create form
+    private void ToggleCreateForm()
+    {
+        showCreateForm = !showCreateForm;
+    }
+
+    // Toggle edit form
+    private void ToggleEditForm(int checklistItemId)
+    {
+        if (openEditChecklistId == checklistItemId)
+        {
+            openEditChecklistId = null;
+        }
+        else
+        {
+            openEditChecklistId = checklistItemId;
+        }
     }
 }

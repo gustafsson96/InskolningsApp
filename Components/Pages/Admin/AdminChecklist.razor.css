@@ -165,8 +165,48 @@
     white-space: nowrap;
 }
 
+.admin-checklist-page > .primary-button {
+    margin-bottom: 1.5em;
+}
+
+.module-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+    margin-top: 1.25em;
+}
+
+.icon-button {
+    width: 38px;
+    height: 38px;
+    border: 1px solid #d0d5dd;
+    border-radius: 12px;
+    background: white;
+    color: #101828;
+    font-size: 1.1em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.icon-button:hover {
+    background: #f9fafb;
+    border-color: #cbd5e1;
+}
+
+.icon-button.danger {
+    color: #dc2626;
+}
+
+.icon-button.danger:hover {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #b91c1c;
+}
+
 .edit-checklist-form {
-    border-top: 1px solid #e4e7ec;
     padding-top: 1.5em;
     max-width: 760px;
 }
@@ -174,6 +214,10 @@
 .edit-checklist-form h4 {
     margin: 0 0 1em 0;
     color: #101828;
+}
+
+.admin-form-card {
+    margin-top: 0;
 }
 
 .empty-text {
