@@ -1,0 +1,200 @@
+.admin-checklist-page {
+    max-width: 1200px;
+}
+
+.admin-page-header {
+    margin-bottom: 2em;
+}
+
+.admin-page-header h1 {
+    margin: 0 0 0.25em 0;
+    font-size: 2.5rem;
+}
+
+.admin-page-header p {
+    margin: 0;
+    color: #667085;
+    font-size: 1.1rem;
+}
+
+.admin-message {
+    background: #f9fafb;
+    border: 1px solid #e4e7ec;
+    border-radius: 12px;
+    padding: 1em;
+    margin-bottom: 1.5em;
+}
+
+.admin-form-card,
+.checklist-admin-card {
+    background: white;
+    border: 1px solid #e4e7ec;
+    border-radius: 20px;
+    padding: 1.5em;
+}
+
+.admin-form-card {
+    margin-bottom: 2em;
+    max-width: 760px;
+}
+
+.admin-form-card h2,
+.checklist-list-section h2 {
+    margin-top: 0;
+}
+
+.form-group {
+    margin-bottom: 1em;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.35em;
+    font-weight: 600;
+    color: #344054;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    border: 1px solid #d0d5dd;
+    border-radius: 12px;
+    padding: 0.8em 1em;
+    font: inherit;
+    background: white;
+}
+
+.form-group textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+.small-field {
+    max-width: 220px;
+}
+
+.primary-button,
+.secondary-button {
+    border: 1px solid #d0d5dd;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.primary-button {
+    background: #030014;
+    color: white;
+    border-color: #030014;
+    padding: 0.9em 1.2em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65em;
+}
+
+.secondary-button {
+    background: white;
+    color: #101828;
+    padding: 0.8em 1em;
+}
+
+.secondary-button:hover {
+    background: #f9fafb;
+}
+
+.danger-button {
+    color: #dc2626;
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.75em;
+    flex-wrap: wrap;
+}
+
+.checklist-list {
+    display: grid;
+    gap: 1.25em;
+}
+
+.checklist-card-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5em;
+    margin-bottom: 1.5em;
+}
+
+.checklist-title-row {
+    display: flex;
+    gap: 1em;
+    align-items: flex-start;
+}
+
+.checklist-order {
+    min-width: 42px;
+    height: 36px;
+    border-radius: 12px;
+    background: #f2f4f7;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.checklist-title-row h3 {
+    margin: 0 0 0.4em 0;
+    font-size: 1.35rem;
+}
+
+.checklist-title-row p {
+    margin: 0;
+    color: #667085;
+    line-height: 1.5;
+}
+
+.category-badge {
+    display: inline-flex;
+    align-items: center;
+    height: fit-content;
+    border-radius: 999px;
+    background: #f2f4f7;
+    color: #344054;
+    padding: 0.45em 0.8em;
+    font-size: 0.9em;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.edit-checklist-form {
+    border-top: 1px solid #e4e7ec;
+    padding-top: 1.5em;
+    max-width: 760px;
+}
+
+.edit-checklist-form h4 {
+    margin: 0 0 1em 0;
+    color: #101828;
+}
+
+.empty-text {
+    color: #667085;
+}
+
+@media (max-width: 700px) {
+    .admin-page-header h1 {
+        font-size: 2em;
+    }
+
+    .checklist-card-top {
+        flex-direction: column;
+    }
+
+    .category-badge {
+        width: fit-content;
+    }
+
+    .admin-form-card,
+    .checklist-admin-card {
+        padding: 1.25em;
+    }
+}

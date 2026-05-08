@@ -7,115 +7,121 @@
 @attribute [Authorize(Roles = "Admin")]
 @inject ApplicationDbContext Db
 
-<h1>Hantera checklista</h1>
-<p>Här kan administratörer skapa, ändra och ta bort checklistpunkter.</p>
 
-@if (!string.IsNullOrWhiteSpace(message))
-{
-    <p>@message</p>
-}
-
-<section style="border:1px solid #ccc; padding:1em; margin-bottom:1.5em;">
-    <h2>Skapa ny checklistpunkt</h2>
-
-    <div>
-        <label>Titel</label><br />
-        <input @bind="newItem.Title" />
+<div class="admin-checklist-page">
+    <div class="admin-page-header">
+        <div>
+            <h1>Hantera checklista</h1>
+            <p>Här kan administratörer skapa, ändra och ta bort checklistpunkter.</p>
+        </div>
     </div>
-
-    <div style="margin-top:0.5em;">
-        <label>Beskrivning</label><br />
-        <textarea @bind="newItem.Description"></textarea>
-    </div>
-
-    <div style="margin-top:0.5em;">
-        <label>Kategori</label><br />
-        <select @bind="newItem.Category">
-            <option value="">Välj kategori</option>
-            @foreach (var module in modules)
-            {
-                <option value="@module.Title">@module.Title</option>
-            }
-        </select>
-    </div>
-
-    <div style="margin-top:0.5em;">
-        <button @onclick="CreateChecklistItem">Lägg till checklistpunkt</button>
-    </div>
-</section>
-
-<section>
-    <h2>Befintliga checklistpunkter</h2>
-
-    @if (checklistItems.Count == 0)
+    @if (!string.IsNullOrWhiteSpace(message))
     {
-        <p>Inga checklistpunkter finns ännu.</p>
+        <p class="admin-message">@message</p>
     }
-    else
-    {
-        @foreach (var item in checklistItems.OrderBy(i => i.OrderIndex))
-        {
-            var editForm = GetEditForm(item.ChecklistItemId);
 
-            <div style="border:1px solid #ddd; padding:1em; margin-bottom:1em;">
-                <h3>@item.Title</h3>
+    <section class="admin-form-card">
+        <h2>Skapa ny checklistpunkt</h2>
 
-                @if (!string.IsNullOrWhiteSpace(item.Description))
+        <div class="form-group">
+            <label>Titel</label><br />
+            <input @bind="newItem.Title" />
+        </div>
+
+        <div class="form-group">
+            <label>Beskrivning</label><br />
+            <textarea @bind="newItem.Description"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Kategori</label><br />
+            <select @bind="newItem.Category">
+                <option value="">Välj kategori</option>
+                @foreach (var module in modules)
                 {
-                    <p>@item.Description</p>
+                    <option value="@module.Title">@module.Title</option>
                 }
+            </select>
+        </div>
 
-                <p>
-                    <strong>Kategori:</strong>
-                    @(string.IsNullOrWhiteSpace(item.Category) ? "Ingen kategori" : item.Category)
-                </p>
+        <button class="primary-button" @onclick="CreateChecklistItem">Lägg till checklistpunkt</button>
+    </section>
 
-                <p>
-                    <strong>Sortering:</strong> @item.OrderIndex
-                </p>
+    <section class="checklist-list-section">
+        <h2>Befintliga checklistpunkter</h2>
 
-                <h4>Redigera</h4>
+        @if (checklistItems.Count == 0)
+        {
+            <p class="empty-text">Inga checklistpunkter finns ännu.</p>
+        }
+        else
+        {
+            <div class="checklist-list">
+                @foreach (var item in checklistItems.OrderBy(i => i.OrderIndex))
+                {
+                    var editForm = GetEditForm(item.ChecklistItemId);
 
-                <div>
-                    <label>Titel</label><br />
-                    <input @bind="editForm.Title" />
-                </div>
+                    <article class="checklist-admin-card">
+                        <div class="checklist-card-top">
+                            <div class="checklist-title-row">
+                                <span class="checklist-order">@item.OrderIndex</span>
 
-                <div style="margin-top:0.5em;">
-                    <label>Beskrivning</label><br />
-                    <textarea @bind="editForm.Description"></textarea>
-                </div>
+                                <div>
+                                    <h3>@item.Title</h3>
 
-                <div style="margin-top:0.5em;">
-                    <label>Kategori</label><br />
-                    <select @bind="editForm.Category">
-                        <option value="">Välj kategori</option>
-                        @foreach (var module in modules)
-                        {
-                            <option value="@module.Title">@module.Title</option>
-                        }
-                    </select>
-                </div>
+                                    @if (!string.IsNullOrWhiteSpace(item.Description))
+                                    {
+                                        <p>@item.Description</p>
+                                    }
+                                </div>
 
-                <div style="margin-top:0.5em;">
-                    <label>Sorteringsordning</label><br />
-                    <input type="number" @bind="editForm.OrderIndex" />
-                </div>
+                            </div>
 
-                <div style="margin-top:0.75em;">
-                    <button @onclick="() => UpdateChecklistItem(item.ChecklistItemId)">
-                        Spara ändringar
-                    </button>
+                            <span class="category-badge">
+                                @(string.IsNullOrWhiteSpace(item.Category) ? "Ingen kategori" : item.Category)
+                            </span>
+                        </div>
 
-                    <button @onclick="() => DeleteChecklistItem(item.ChecklistItemId)">
-                        Ta bort
-                    </button>
-                </div>
+                        <div class="edit-checklist-form">
+                            <h4>Redigera checklistpunkt</h4>
+
+                            <div class="form-group">
+                                <label>Titel</label>
+                                <input @bind="editForm.Title" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>Beskrivning</label>
+                                <textarea @bind="editForm.Description"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Kategori</label>
+                                <select @bind="editForm.Category">
+                                    <option value="">Välj kategori</option>
+                                    @foreach (var module in modules)
+                                    {
+                                        <option value="@module.Title">@module.Title</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="form-actions">
+                                <button class="secondary-button" @onclick="() => UpdateChecklistItem(item.ChecklistItemId)">
+                                    Spara ändringar
+                                </button>
+
+                                <button class="secondary-button" @onclick="() => DeleteChecklistItem(item.ChecklistItemId)">
+                                    Ta bort
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+                }
             </div>
         }
-    }
-</section>
-
+    </section>
+</div>
 @code {
     // Stores all checklist items from the database
     private List<ChecklistItem> checklistItems = new();
@@ -224,7 +230,7 @@
 
         message = "Checklistpunkten skapades.";
 
-        // Reload data 
+        // Reload data
         await LoadData();
     }
 
