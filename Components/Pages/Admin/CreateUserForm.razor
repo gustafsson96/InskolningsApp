@@ -1,0 +1,110 @@
+@using Microsoft.AspNetCore.Identity
+@using OnboardingApp.Models
+
+@inject UserManager<ApplicationUser> UserManager
+
+<section class="admin-form-card">
+    <div class="admin-form-header">
+        <h2>Skapa ny användare</h2>
+        <p>Lägg till en ny person och tilldela roll.</p>
+    </div>
+
+    <div class="admin-form-grid">
+        <div class="form-field">
+            <label>Förnamn</label>
+            <input @bind="newUser.FirstName" />
+        </div>
+
+        <div class="form-field">
+            <label>Efternamn</label>
+            <input @bind="newUser.LastName" />
+        </div>
+
+        <div class="form-field">
+            <label>E-post</label>
+            <input @bind="newUser.Email" />
+        </div>
+
+        <div class="form-field">
+            <label>Startdatum</label>
+            <input type="date" @bind="newUser.Startdate" />
+        </div>
+
+        <div class="form-field">
+            <label>Roll</label>
+            <select @bind="newUser.Role">
+                <option value="Employee">Medarbetare</option>
+                <option value="Admin">Admin</option>
+            </select>
+        </div>
+
+        <div class="form-field">
+            <label>Lösenord</label>
+            <input type="password" @bind="newUser.Password" />
+        </div>
+    </div>
+
+    <div class="admin-form-actions">
+        <button class="secondary-button" @onclick="OnCancel">Avbryt</button>
+
+        <button class="primary-button" @onclick="CreateUser">
+            <i class="fa-solid fa-plus"></i>
+            Skapa användare
+        </button>
+    </div>
+</section>
+
+@code {
+    [Parameter] public EventCallback OnUserCreated { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback<string> OnMessage { get; set; }
+
+    private UserFormModel newUser = new();
+
+    private class UserFormModel
+    {
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public DateTime? Startdate { get; set; }
+        public string Role { get; set; } = "Employee";
+        public string Password { get; set; } = string.Empty;
+    }
+
+    private async Task CreateUser()
+    {
+        if (string.IsNullOrWhiteSpace(newUser.FirstName) ||
+            string.IsNullOrWhiteSpace(newUser.LastName) ||
+            string.IsNullOrWhiteSpace(newUser.Email) ||
+            string.IsNullOrWhiteSpace(newUser.Password))
+        {
+            await OnMessage.InvokeAsync("Förnamn, efternamn, e-post och lösenord måste anges.");
+            return;
+        }
+
+        var user = new ApplicationUser
+        {
+            UserName = newUser.Email,
+            Email = newUser.Email,
+            EmailConfirmed = true,
+            FirstName = newUser.FirstName,
+            LastName = newUser.LastName,
+            Startdate = newUser.Startdate
+        };
+
+        var result = await UserManager.CreateAsync(user, newUser.Password);
+
+        if (!result.Succeeded)
+        {
+            await OnMessage.InvokeAsync(string.Join(" ", result.Errors.Select(e => e.Description)));
+            return;
+        }
+
+        await UserManager.AddToRoleAsync(user, newUser.Role);
+
+        newUser = new UserFormModel();
+
+        await OnMessage.InvokeAsync("Användaren skapades.");
+        await OnUserCreated.InvokeAsync();
+    }
+}
