@@ -17,6 +17,7 @@
             <h1>Hantera användare</h1>
             <p>Här kan administratörer skapa användare och hantera deras uppgifter.</p>
         </div>
+
         <button class="primary-button" @onclick="ToggleCreateForm">
             <i class="fa-solid fa-plus"></i>
             Ny användare
@@ -96,25 +97,8 @@
 
                                 <div class="user-meta">
                                     <span class="role-badge @(form.Role == "Admin" ? "admin" : "employee")">
-                                        @(form.Role == "Admin" ? "Admin" : "Medarbetare")
+                                        @(form.Role == "Admin" ? "Admin" : "Badpersonal")
                                     </span>
-
-                                    <div class="user-progress-section">
-                                        <div class="progress-header">
-                                            <span class="status-badge @(GetUserStatus(user.Id).ToLower().Replace(" ", "-"))">
-                                                @GetUserStatus(user.Id)
-                                            </span>
-
-                                            <span class="progress-count">
-                                                @GetCompletedModuleCount(user.Id) av @modules.Count moduler
-                                            </span>
-                                        </div>
-
-                                        <div class="progress-track">
-                                            <div class="progress-bar" style="width: @GetModuleProgressPercent(user.Id)%">
-                                            </div>
-                                        </div>
-                                    </div>
 
                                     @if (user.Startdate.HasValue)
                                     {
@@ -126,62 +110,119 @@
                                 </div>
                             </div>
 
-                            <div class="user-actions">
-                                <button class="secondary-button" @onclick="() => ToggleEditForm(user.Id)">
-                                    <i class="fa-solid fa-pen"></i>
-                                    Redigera
-                                </button>
+                            <div class="user-card-progress">
+                                <div class="progress-header">
+                                    <span class="status-badge @GetUserStatusClass(user.Id)">
+                                        @GetUserStatus(user.Id)
+                                    </span>
 
-                                <button class="danger-button" @onclick="() => DeleteUser(user.Id)">
-                                    <i class="fa-solid fa-trash"></i>
-                                    Ta bort
+                                    <span class="progress-count">
+                                        @GetCompletedModuleCount(user.Id) av @modules.Count moduler
+                                    </span>
+                                </div>
+
+                                <div class="progress-track">
+                                    <div class="progress-bar" style="width: @GetModuleProgressPercent(user.Id)%"></div>
+                                </div>
+                            </div>
+
+                            <div class="user-actions">
+                                <button class="secondary-button" @onclick="() => ToggleManagePanel(user.Id)">
+                                    <i class="fa-solid fa-ellipsis"></i>
                                 </button>
                             </div>
                         </div>
 
-                        @if (editingUserId == user.Id)
+                        @if (activeUserPanelId == user.Id)
                         {
-                            <div class="user-edit-panel">
-                                <div class="user-edit-grid">
-                                    <div class="form-field">
-                                        <label>Förnamn</label>
-                                        <input @bind="form.FirstName" />
-                                    </div>
-
-                                    <div class="form-field">
-                                        <label>Efternamn</label>
-                                        <input @bind="form.LastName" />
-                                    </div>
-
-                                    <div class="form-field">
-                                        <label>E-post</label>
-                                        <input @bind="form.Email" />
-                                    </div>
-
-                                    <div class="form-field">
-                                        <label>Startdatum</label>
-                                        <input type="date" @bind="form.Startdate" />
-                                    </div>
-
-                                    <div class="form-field">
-                                        <label>Roll</label>
-                                        <select @bind="form.Role">
-                                            <option value="Employee">Medarbetare</option>
-                                            <option value="Admin">Admin</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="user-edit-actions">
-                                    <button class="secondary-button" @onclick="CloseEditForm">
-                                        Avbryt
+                            <div class="user-manage-panel">
+                                <div class="manage-action-row">
+                                    <button class="secondary-button" @onclick="() => ToggleDetails(user.Id)">
+                                        <i class="fa-solid fa-chart-simple"></i>
+                                        Modulstatus
                                     </button>
 
-                                    <button class="primary-button" @onclick="() => UpdateUser(user.Id)">
-                                        <i class="fa-solid fa-floppy-disk"></i>
-                                        Spara ändringar
+                                    <button class="secondary-button" @onclick="() => ToggleEditForm(user.Id)">
+                                        <i class="fa-solid fa-pen"></i>
+                                        Redigera uppgifter
+                                    </button>
+
+                                    <button class="danger-button" @onclick="() => DeleteUser(user.Id)">
+                                        <i class="fa-solid fa-trash"></i>
+                                        Ta bort användare
                                     </button>
                                 </div>
+
+                                @if (detailsUserId == user.Id)
+                                {
+                                    <div class="module-status-list">
+                                        <h5>Modulstatus</h5>
+
+                                        @foreach (var module in modules)
+                                        {
+                                            var completed = IsModuleCompleted(user.Id, module.ModuleId);
+
+                                            <div class="module-status-bar-row">
+                                                <div class="module-status-bar-header">
+                                                    <span>@module.Title</span>
+                                                    <strong>@(completed ? "Avklarad" : "Ej avklarad")</strong>
+                                                </div>
+
+                                                <div class="module-status-track">
+                                                    <div class="module-status-fill @(completed ? "completed" : "not-completed")"
+                                                         style="width: @(completed ? 100 : 0)%">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+
+                                @if (editingUserId == user.Id)
+                                {
+                                    <div class="user-edit-panel">
+                                        <div class="user-edit-grid">
+                                            <div class="form-field">
+                                                <label>Förnamn</label>
+                                                <input @bind="form.FirstName" />
+                                            </div>
+
+                                            <div class="form-field">
+                                                <label>Efternamn</label>
+                                                <input @bind="form.LastName" />
+                                            </div>
+
+                                            <div class="form-field">
+                                                <label>E-post</label>
+                                                <input @bind="form.Email" />
+                                            </div>
+
+                                            <div class="form-field">
+                                                <label>Startdatum</label>
+                                                <input type="date" @bind="form.Startdate" />
+                                            </div>
+
+                                            <div class="form-field">
+                                                <label>Roll</label>
+                                                <select @bind="form.Role">
+                                                    <option value="Employee">Medarbetare</option>
+                                                    <option value="Admin">Admin</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="user-edit-actions">
+                                            <button class="secondary-button" @onclick="CloseEditForm">
+                                                Avbryt
+                                            </button>
+
+                                            <button class="primary-button" @onclick="() => UpdateUser(user.Id)">
+                                                <i class="fa-solid fa-floppy-disk"></i>
+                                                Spara ändringar
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
                             </div>
                         }
                     </article>
@@ -201,6 +242,8 @@
     // Stores edit form data for each user
     private Dictionary<string, UserFormModel> editForms = new();
 
+    private string? activeUserPanelId;
+    private string? detailsUserId;
     private string? editingUserId;
     private List<ModuleModel> modules = new();
     private List<UserModuleProgress> moduleProgresses = new();
@@ -246,12 +289,40 @@
         message = newMessage;
     }
 
+    // Get initals to display in list
     private string GetInitials(ApplicationUser user)
     {
         var first = string.IsNullOrWhiteSpace(user.FirstName) ? "" : user.FirstName[0].ToString();
         var last = string.IsNullOrWhiteSpace(user.LastName) ? "" : user.LastName[0].ToString();
 
         return $"{first}{last}".ToUpper();
+    }
+
+    // Toggle options for a user
+    private void ToggleManagePanel(string userId)
+    {
+        activeUserPanelId = activeUserPanelId == userId ? null : userId;
+
+        if (activeUserPanelId != userId)
+        {
+            detailsUserId = null;
+            editingUserId = null;
+        }
+    }
+
+    // Toggle detailed progress overview
+    private void ToggleDetails(string userId)
+    {
+        detailsUserId = detailsUserId == userId ? null : userId;
+        editingUserId = null;
+    }
+
+    private bool IsModuleCompleted(string userId, int moduleId)
+    {
+        return moduleProgresses.Any(p =>
+            p.UserId == userId &&
+            p.ModuleId == moduleId &&
+            p.IsCompleted);
     }
 
     // Returns number of completed modules for a user
