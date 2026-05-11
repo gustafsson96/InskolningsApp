@@ -3,9 +3,13 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
 @using OnboardingApp.Models
+@using Microsoft.EntityFrameworkCore
+@using OnboardingApp.Data
+@using ModuleModel = OnboardingApp.Models.Module
 @attribute [Authorize(Roles = "Admin")]
 
 @inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext Db
 
 <div class="admin-users-page">
     <div class="admin-page-header">
@@ -95,6 +99,23 @@
                                         @(form.Role == "Admin" ? "Admin" : "Medarbetare")
                                     </span>
 
+                                    <div class="user-progress-section">
+                                        <div class="progress-header">
+                                            <span class="status-badge @(GetUserStatus(user.Id).ToLower().Replace(" ", "-"))">
+                                                @GetUserStatus(user.Id)
+                                            </span>
+
+                                            <span class="progress-count">
+                                                @GetCompletedModuleCount(user.Id) av @modules.Count moduler
+                                            </span>
+                                        </div>
+
+                                        <div class="progress-track">
+                                            <div class="progress-bar" style="width: @GetModuleProgressPercent(user.Id)%">
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     @if (user.Startdate.HasValue)
                                     {
                                         <span>
@@ -181,6 +202,8 @@
     private Dictionary<string, UserFormModel> editForms = new();
 
     private string? editingUserId;
+    private List<ModuleModel> modules = new();
+    private List<UserModuleProgress> moduleProgresses = new();
 
     // Form model when editing users
     private class UserFormModel
@@ -231,6 +254,63 @@
         return $"{first}{last}".ToUpper();
     }
 
+    // Returns number of completed modules for a user
+    private int GetCompletedModuleCount(string userId)
+    {
+        return moduleProgresses.Count(p =>
+            p.UserId == userId &&
+            p.IsCompleted);
+    }
+
+    // Returns progress percentage for a user
+    private int GetModuleProgressPercent(string userId)
+    {
+        if (modules.Count == 0)
+        {
+            return 0;
+        }
+
+        return (int)Math.Round(
+            (double)GetCompletedModuleCount(userId) / modules.Count * 100
+        );
+    }
+
+    // Returns onboarding status class
+    private string GetUserStatusClass(string userId)
+    {
+        var completed = GetCompletedModuleCount(userId);
+
+        if (completed == 0)
+        {
+            return "not-started";
+        }
+
+        if (completed == modules.Count)
+        {
+            return "completed";
+        }
+
+        return "in-progress";
+    }
+
+    // Returns onboarding status label
+    private string GetUserStatus(string userId)
+    {
+        var completed = GetCompletedModuleCount(userId);
+
+        if (completed == 0)
+        {
+            return "Ej påbörjad";
+        }
+
+        if (completed == modules.Count)
+        {
+            return "Avklarad";
+        }
+
+        return "Påbörjad";
+    }
+
     // Loads all users and prepares edit forms
     private async Task LoadUsers()
     {
@@ -254,6 +334,13 @@
                 Role = roles.FirstOrDefault() ?? "Employee"
             };
         }
+
+        modules = await Db.Modules
+            .OrderBy(m => m.OrderIndex)
+            .ToListAsync();
+
+        moduleProgresses = await Db.UserModuleProgresses
+            .ToListAsync();
     }
 
     // Returns the edit form for a selected user

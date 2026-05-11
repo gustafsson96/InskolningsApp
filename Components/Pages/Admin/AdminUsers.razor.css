@@ -148,6 +148,62 @@
     font-size: 0.9rem;
 }
 
+.user-progress-section {
+    margin-top: 0.85em;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1em;
+    margin-bottom: 0.5em;
+}
+
+.progress-count {
+    font-size: 0.9rem;
+    color: #667085;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.3em 0.75em;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-badge.not-started {
+    background: #f2f4f7;
+    color: #344054;
+}
+
+.status-badge.in-progress {
+    background: #fffaeb;
+    color: #b54708;
+}
+
+.status-badge.completed {
+    background: #ecfdf3;
+    color: #067647;
+}
+
+.progress-track {
+    width: 100%;
+    height: 10px;
+    border-radius: 999px;
+    background: #eaecf0;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #2563eb, #7c3aed);
+    transition: width 0.3s ease;
+}
+
 .role-badge {
     display: inline-flex;
     align-items: center;
