@@ -29,57 +29,145 @@
         <CreateUserForm OnUserCreated="HandleUserCreated" OnCancel="HideCreateForm" OnMessage="SetMessage" />
     }
 
-    <section>
+    <section class="admin-user-stats">
         <h2>Befintliga användare</h2>
+
+        <article class="admin-stat-card">
+            <span class="stat-icon blue">
+                <i class="fa-solid fa-users"></i>
+            </span>
+            <div>
+                <p>Totalt användare</p>
+                <strong>@users.Count</strong>
+            </div>
+        </article>
+
+        <article class="admin-stat-card">
+            <span class="stat-icon green">
+                <i class="fa-solid fa-user-check"></i>
+            </span>
+            <div>
+                <p>Medarbetare</p>
+                <strong>@users.Count(u => GetEditForm(u.Id).Role == "Employee")</strong>
+            </div>
+        </article>
+
+        <article class="admin-stat-card">
+            <span class="stat-icon purple">
+                <i class="fa-solid fa-user-shield"></i>
+            </span>
+            <div>
+                <p>Administratörer</p>
+                <strong>@users.Count(u => GetEditForm(u.Id).Role == "Admin")</strong>
+            </div>
+        </article>
+    </section>
+
+    <section class="admin-users-list-card">
+        <div class="admin-section-header">
+            <div>
+                <h2>Befintliga användare</h2>
+                <p>@users.Count användare registrerade i systemet</p>
+            </div>
+        </div>
 
         @if (users.Count == 0)
         {
-            <p>Inga användare hittades.</p>
+            <p class="empty-text">Inga användare hittades.</p>
         }
         else
         {
-            @foreach (var user in users)
-            {
-                var form = GetEditForm(user.Id);
+            <div class="users-list">
+                @foreach (var user in users)
+                {
+                    var form = GetEditForm(user.Id);
 
-                <div style="border:1px solid #ddd; padding:1em; margin-bottom:1em;">
-                    <h3>@user.FirstName @user.LastName</h3>
-                    <p><strong>E-post:</strong> @user.Email</p>
+                    <article class="user-card">
+                        <div class="user-card-top">
+                            <div class="user-avatar">
+                                @GetInitials(user)
+                            </div>
 
-                    <div>
-                        <label>Förnamn</label><br />
-                        <input @bind="form.FirstName" />
-                    </div>
+                            <div class="user-summary">
+                                <h3>@user.FirstName @user.LastName</h3>
+                                <p>@user.Email</p>
 
-                    <div style="margin-top:0.5em;">
-                        <label>Efternamn</label><br />
-                        <input @bind="form.LastName" />
-                    </div>
+                                <div class="user-meta">
+                                    <span class="role-badge @(form.Role == "Admin" ? "admin" : "employee")">
+                                        @(form.Role == "Admin" ? "Admin" : "Medarbetare")
+                                    </span>
 
-                    <div style="margin-top:0.5em;">
-                        <label>E-post</label><br />
-                        <input @bind="form.Email" />
-                    </div>
+                                    @if (user.Startdate.HasValue)
+                                    {
+                                        <span>
+                                            <i class="fa-regular fa-calendar"></i>
+                                            Start: @user.Startdate.Value.ToString("yyyy-MM-dd")
+                                        </span>
+                                    }
+                                </div>
+                            </div>
 
-                    <div style="margin-top:0.5em;">
-                        <label>Startdatum</label><br />
-                        <input type="date" @bind="form.Startdate" />
-                    </div>
+                            <div class="user-actions">
+                                <button class="secondary-button" @onclick="() => ToggleEditForm(user.Id)">
+                                    <i class="fa-solid fa-pen"></i>
+                                    Redigera
+                                </button>
 
-                    <div style="margin-top:0.5em;">
-                        <label>Roll</label><br />
-                        <select @bind="form.Role">
-                            <option value="Employee">Employee</option>
-                            <option value="Admin">Admin</option>
-                        </select>
-                    </div>
+                                <button class="danger-button" @onclick="() => DeleteUser(user.Id)">
+                                    <i class="fa-solid fa-trash"></i>
+                                    Ta bort
+                                </button>
+                            </div>
+                        </div>
 
-                    <div style="margin-top:0.75em;">
-                        <button @onclick="() => UpdateUser(user.Id)">Spara ändringar</button>
-                        <button @onclick="() => DeleteUser(user.Id)">Ta bort</button>
-                    </div>
-                </div>
-            }
+                        @if (editingUserId == user.Id)
+                        {
+                            <div class="user-edit-panel">
+                                <div class="user-edit-grid">
+                                    <div class="form-field">
+                                        <label>Förnamn</label>
+                                        <input @bind="form.FirstName" />
+                                    </div>
+
+                                    <div class="form-field">
+                                        <label>Efternamn</label>
+                                        <input @bind="form.LastName" />
+                                    </div>
+
+                                    <div class="form-field">
+                                        <label>E-post</label>
+                                        <input @bind="form.Email" />
+                                    </div>
+
+                                    <div class="form-field">
+                                        <label>Startdatum</label>
+                                        <input type="date" @bind="form.Startdate" />
+                                    </div>
+
+                                    <div class="form-field">
+                                        <label>Roll</label>
+                                        <select @bind="form.Role">
+                                            <option value="Employee">Medarbetare</option>
+                                            <option value="Admin">Admin</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="user-edit-actions">
+                                    <button class="secondary-button" @onclick="CloseEditForm">
+                                        Avbryt
+                                    </button>
+
+                                    <button class="primary-button" @onclick="() => UpdateUser(user.Id)">
+                                        <i class="fa-solid fa-floppy-disk"></i>
+                                        Spara ändringar
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </article>
+                }
+            </div>
         }
     </section>
 </div>
@@ -93,6 +181,8 @@
 
     // Stores edit form data for each user
     private Dictionary<string, UserFormModel> editForms = new();
+
+    private string? editingUserId;
 
     // Form model when editing users
     private class UserFormModel
@@ -179,6 +269,18 @@
         return editForms[userId];
     }
 
+    // Open edit user form
+    private void ToggleEditForm(string userId)
+    {
+        editingUserId = editingUserId == userId ? null : userId;
+    }
+
+    // Close edit user form
+    private void CloseEditForm()
+    {
+        editingUserId = null;
+    }
+
     // Updates user details and role
     private async Task UpdateUser(string userId)
     {
@@ -226,6 +328,8 @@
         message = "Användaren uppdaterades.";
 
         await LoadUsers();
+
+        editingUserId = null;
     }
 
     // Deletes a user from Identity
