@@ -6,64 +6,83 @@
 @attribute [Authorize(Roles = "Admin")]
 
 @inject UserManager<ApplicationUser> UserManager
-@inject RoleManager<IdentityRole> RoleManager
 
-<h1>Hantera användare</h1>
-<p>Här kan administratörer skapa användare och hantera deras uppgifter.</p>
+<div class="admin-users-page">
+    <div class="admin-page-header">
+        <div>
+            <h1>Hantera användare</h1>
+            <p>Här kan administratörer skapa användare och hantera deras uppgifter.</p>
+        </div>
+        <button class="primary-button" @onclick="ToggleCreateForm">
+            <i class="fa-solid fa-plus"></i>
+            Ny användare
+        </button>
+    </div>
 
-<section>
-    <h2>Befintliga användare</h2>
-
-    @if (users.Count == 0)
+    @if (!string.IsNullOrWhiteSpace(message))
     {
-        <p>Inga användare hittades.</p>
+        <p class="admin-message">@message</p>
     }
-    else
+
+    @if (showCreateForm)
     {
-        @foreach (var user in users)
+        <CreateUserForm OnUserCreated="HandleUserCreated" OnCancel="HideCreateForm" OnMessage="SetMessage" />
+    }
+
+    <section>
+        <h2>Befintliga användare</h2>
+
+        @if (users.Count == 0)
         {
-            var form = GetEditForm(user.Id);
-
-            <div style="border:1px solid #ddd; padding:1em; margin-bottom:1em;">
-                <h3>@user.FirstName @user.LastName</h3>
-                <p><strong>E-post:</strong> @user.Email</p>
-
-                <div>
-                    <label>Förnamn</label><br />
-                    <input @bind="form.FirstName" />
-                </div>
-
-                <div style="margin-top:0.5em;">
-                    <label>Efternamn</label><br />
-                    <input @bind="form.LastName" />
-                </div>
-
-                <div style="margin-top:0.5em;">
-                    <label>E-post</label><br />
-                    <input @bind="form.Email" />
-                </div>
-
-                <div style="margin-top:0.5em;">
-                    <label>Startdatum</label><br />
-                    <input type="date" @bind="form.Startdate" />
-                </div>
-
-                <div style="margin-top:0.5em;">
-                    <label>Roll</label><br />
-                    <select @bind="form.Role">
-                        <option value="Employee">Employee</option>
-                        <option value="Admin">Admin</option>
-                    </select>
-                </div>
-
-                <div style="margin-top:0.75em;">
-                    <button @onclick="() => UpdateUser(user.Id)">Spara ändringar</button>
-                    <button @onclick="() => DeleteUser(user.Id)">Ta bort</button>
-                </div>
-            </div>
+            <p>Inga användare hittades.</p>
         }
-    }
-</section>
+        else
+        {
+            @foreach (var user in users)
+            {
+                var form = GetEditForm(user.Id);
+
+                <div style="border:1px solid #ddd; padding:1em; margin-bottom:1em;">
+                    <h3>@user.FirstName @user.LastName</h3>
+                    <p><strong>E-post:</strong> @user.Email</p>
+
+                    <div>
+                        <label>Förnamn</label><br />
+                        <input @bind="form.FirstName" />
+                    </div>
+
+                    <div style="margin-top:0.5em;">
+                        <label>Efternamn</label><br />
+                        <input @bind="form.LastName" />
+                    </div>
+
+                    <div style="margin-top:0.5em;">
+                        <label>E-post</label><br />
+                        <input @bind="form.Email" />
+                    </div>
+
+                    <div style="margin-top:0.5em;">
+                        <label>Startdatum</label><br />
+                        <input type="date" @bind="form.Startdate" />
+                    </div>
+
+                    <div style="margin-top:0.5em;">
+                        <label>Roll</label><br />
+                        <select @bind="form.Role">
+                            <option value="Employee">Employee</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-top:0.75em;">
+                        <button @onclick="() => UpdateUser(user.Id)">Spara ändringar</button>
+                        <button @onclick="() => DeleteUser(user.Id)">Ta bort</button>
+                    </div>
+                </div>
+            }
+        }
+    </section>
+</div>
 
 @code {
     // Stores users from Identity
@@ -72,13 +91,10 @@
     // Feedback message shown after create/update/delete
     private string? message;
 
-    // Form model used when creating a new user
-    private UserFormModel newUser = new();
-
     // Stores edit form data for each user
     private Dictionary<string, UserFormModel> editForms = new();
 
-    // Form model for create and edit
+    // Form model when editing users
     private class UserFormModel
     {
         public string FirstName { get; set; } = string.Empty;
@@ -86,12 +102,45 @@
         public string Email { get; set; } = string.Empty;
         public DateTime? Startdate { get; set; }
         public string Role { get; set; } = "Employee";
-        public string Password { get; set; } = string.Empty;
     }
 
     protected override async Task OnInitializedAsync()
     {
         await LoadUsers();
+    }
+
+    // Show form to create new user
+    private bool showCreateForm;
+
+    private void ToggleCreateForm()
+    {
+        showCreateForm = !showCreateForm;
+    }
+
+    // Hide form to create new user
+    private void HideCreateForm()
+    {
+        showCreateForm = false;
+    }
+
+    // Refresh user list after a new user has been created
+    private async Task HandleUserCreated()
+    {
+        showCreateForm = false;
+        await LoadUsers();
+    }
+
+    private void SetMessage(string newMessage)
+    {
+        message = newMessage;
+    }
+
+    private string GetInitials(ApplicationUser user)
+    {
+        var first = string.IsNullOrWhiteSpace(user.FirstName) ? "" : user.FirstName[0].ToString();
+        var last = string.IsNullOrWhiteSpace(user.LastName) ? "" : user.LastName[0].ToString();
+
+        return $"{first}{last}".ToUpper();
     }
 
     // Loads all users and prepares edit forms
@@ -128,44 +177,6 @@
         }
 
         return editForms[userId];
-    }
-
-    // Creates a new Identity user and assigns selected role
-    private async Task CreateUser()
-    {
-        if (string.IsNullOrWhiteSpace(newUser.FirstName) ||
-            string.IsNullOrWhiteSpace(newUser.LastName) ||
-            string.IsNullOrWhiteSpace(newUser.Email) ||
-            string.IsNullOrWhiteSpace(newUser.Password))
-        {
-            message = "Förnamn, efternamn, e-post och lösenord måste anges.";
-            return;
-        }
-
-        var user = new ApplicationUser
-        {
-            UserName = newUser.Email,
-            Email = newUser.Email,
-            EmailConfirmed = true,
-            FirstName = newUser.FirstName,
-            LastName = newUser.LastName,
-            Startdate = newUser.Startdate
-        };
-
-        var result = await UserManager.CreateAsync(user, newUser.Password);
-
-        if (!result.Succeeded)
-        {
-            message = string.Join(" ", result.Errors.Select(e => e.Description));
-            return;
-        }
-
-        await UserManager.AddToRoleAsync(user, newUser.Role);
-
-        newUser = new UserFormModel();
-        message = "Användaren skapades.";
-
-        await LoadUsers();
     }
 
     // Updates user details and role
