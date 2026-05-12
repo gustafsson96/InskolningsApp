@@ -42,7 +42,7 @@ else
                 <div>
                     <h2>Quiz</h2>
                     <p>
-                        Besvara frågorna nedan. Du behöver alla rätt för att avsluta modulen. 
+                        Besvara frågorna nedan. Du behöver alla rätt för att avsluta modulen.
                     </p>
                 </div>
 
@@ -83,8 +83,7 @@ else
                             @foreach (var option in question.Options.OrderBy(o => o.QuizOptionId))
                             {
                                 <label class="option-row @GetOptionCssClass(question, option)">
-                                    <input type="radio"
-                                           name="question-@question.QuizQuestionId"
+                                    <input type="radio" name="question-@question.QuizQuestionId"
                                            checked="@IsSelected(question.QuizQuestionId, option.QuizOptionId)"
                                            @onchange="() => SelectAnswer(question.QuizQuestionId, option.QuizOptionId)"
                                            disabled="@hasSubmitted" />
@@ -97,45 +96,43 @@ else
                 }
 
                 <div class="quiz-actions">
-                    <button class="submit-button"
-                            disabled="@(!AllQuestionsAnswered || hasSubmitted)"
-                            @onclick="SubmitQuiz">
+                    <button class="submit-button" disabled="@(!AllQuestionsAnswered || hasSubmitted)" @onclick="SubmitQuiz">
                         Skicka
                     </button>
                 </div>
                 @if (hasSubmitted)
                 {
                     <div class="quiz-result">
-                    @if (alreadyCompleted)
-                    {
-                        <h3>Repetition slutförd :-)</h3>
-                        <p>Du fick @score av @questions.Count rätt.</p>
-                        <button class="show-answers-button" @onclick="ToggleShowAnswers">
-                            @(showAnswers ? "Dölj svar" : "Visa svar")
-                        </button>
-                    }
-                    else if (score == questions.Count)
-                    {
-                        <h3>Modulen är avklarad!</h3>
-                        <p>Du fick @score av @questions.Count rätt. Full pott.</p>
-                        <p>Du kan göra om quizet när som helst för repetition.</p>
-                        <button class="retry-button" @onclick="RestartQuiz">
-                            Gör quizet igen
-                        </button>
-                    }
-                    else
-                    {
-                        <h3>Resultat</h3>
-                        <p>Du fick @score av @questions.Count rätt.</p>
-                        <p>Du måste få alla rätt för att modulen ska anses som avklarad.</p>
-                        <button class="show-answers-button" @onclick="ToggleShowAnswers">
-                            @(showAnswers ? "Dölj svar" : "Visa svar")
-                        </button>
+                        @if (alreadyCompleted)
+                        {
+                            <h3>Repetition slutförd :-)</h3>
+                            <p>Du fick @score av @questions.Count rätt.</p>
+                            <button class="show-answers-button" @onclick="ToggleShowAnswers">
+                                @(showAnswers ? "Dölj svar" : "Visa svar")
+                            </button>
+                        }
+                        else if (score == questions.Count)
+                        {
+                            <h3>Modulen är avklarad!</h3>
+                            <p>Du fick @score av @questions.Count rätt. Full pott.</p>
+                            <p>Du kan göra om quizet när som helst för repetition.</p>
+                            <button class="retry-button" @onclick="RestartQuiz">
+                                Gör quizet igen
+                            </button>
+                        }
+                        else
+                        {
+                            <h3>Resultat</h3>
+                            <p>Du fick @score av @questions.Count rätt.</p>
+                            <p>Du måste få alla rätt för att modulen ska anses som avklarad.</p>
+                            <button class="show-answers-button" @onclick="ToggleShowAnswers">
+                                @(showAnswers ? "Dölj svar" : "Visa svar")
+                            </button>
 
-                        <button class="retry-button" @onclick="RestartQuiz">
-                            Gör quizet igen
-                        </button>
-                    }
+                            <button class="retry-button" @onclick="RestartQuiz">
+                                Gör quizet igen
+                            </button>
+                        }
                     </div>
                 }
             }
@@ -177,21 +174,21 @@ else
             .OrderBy(q => q.OrderIndex)
             .ToListAsync();
 
-            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
 
-            if (user.Identity?.IsAuthenticated == true)
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId != null)
             {
-                var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-                if (userId != null)
-                {
-                    alreadyCompleted = await Db.UserModuleProgresses
-                        .AnyAsync(p => p.ModuleId == ModuleId &&
-                                    p.UserId == userId &&
-                                    p.IsCompleted);
-                }
+                alreadyCompleted = await Db.UserModuleProgresses
+                    .AnyAsync(p => p.ModuleId == ModuleId &&
+                                p.UserId == userId &&
+                                p.IsCompleted);
             }
+        }
 
         selectedAnswers.Clear();
         hasSubmitted = false;
@@ -247,11 +244,11 @@ else
             CompletedAt = DateTime.UtcNow,
             Score = score,
             TotalQuestions = questions.Count,
-            Passed = score == questions.Count 
+            Passed = score == questions.Count
         };
 
         Db.QuizAttempts.Add(attempt);
-        await Db.SaveChangesAsync(); 
+        await Db.SaveChangesAsync();
 
         // Save user's selected answers for a quiz attempt
         foreach (var q in questions)
@@ -296,6 +293,70 @@ else
                 Db.UserModuleProgresses.Add(progress);
             }
         }
+
+        await Db.SaveChangesAsync();
+
+        if (attempt.Passed)
+        {
+            await CheckAndCreateModuleNotifications(userId);
+        }
+    }
+
+    // Checks if the user has completed all modules and creates an admin notification if needed
+    private async Task CheckAndCreateModuleNotifications(string userId)
+    {
+        var user = await Db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user is null)
+        {
+            return;
+        }
+
+        var totalModules = await Db.Modules.CountAsync();
+
+        var completedModules = await Db.UserModuleProgresses
+            .CountAsync(p => p.UserId == userId && p.IsCompleted);
+
+        if (totalModules == 0 || completedModules < totalModules)
+        {
+            return;
+        }
+
+        await CreateAdminNotificationIfMissing(
+            userId,
+            "AllModulesCompleted",
+            "Alla moduler slutförda",
+            $"{user.FirstName} {user.LastName} har slutfört alla moduler med godkända resultat.",
+            DateTime.UtcNow);
+    }
+
+    // Creates an admin notification only if the same notification does not already exist
+    private async Task CreateAdminNotificationIfMissing(
+        string userId,
+        string type,
+        string title,
+        string message,
+        DateTime dueDate)
+    {
+        var exists = await Db.AdminNotifications.AnyAsync(n =>
+            n.UserId == userId &&
+            n.Type == type);
+
+        if (exists)
+        {
+            return;
+        }
+
+        Db.AdminNotifications.Add(new AdminNotification
+        {
+            UserId = userId,
+            Type = type,
+            Title = title,
+            Message = message,
+            DueDate = dueDate,
+            CreatedAt = DateTime.UtcNow,
+            IsRead = false
+        });
 
         await Db.SaveChangesAsync();
     }

@@ -47,32 +47,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Temporary test notification to adjust styling
-        if (!await Db.AdminNotifications.AnyAsync())
-        {
-            var user = await Db.Users.FirstOrDefaultAsync();
-
-            if (user is not null)
-            {
-                Db.AdminNotifications.Add(new OnboardingApp.Models.AdminNotification
-                {
-                    UserId = user.Id,
-                    Title = "Testnotis",
-                    Message = $"{user.FirstName} {user.LastName} har slutfört alla moduler.",
-                    DueDate = DateTime.UtcNow,
-                    CreatedAt = DateTime.UtcNow,
-                    IsRead = false,
-                    Type = "Test"
-                });
-
-                await Db.SaveChangesAsync();
-            }
-        }
-
         // Load the latest notifications
         notifications = await Db.AdminNotifications
-            .OrderBy(n => n.IsRead)
-            .ThenBy(n => n.DueDate)
+            .Where(n => !n.IsRead)
+            .OrderBy(n => n.DueDate)
             .Take(5)
             .ToListAsync();
 
