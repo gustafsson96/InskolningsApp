@@ -299,6 +299,7 @@ else
         if (attempt.Passed)
         {
             await CheckAndCreateModuleNotifications(userId);
+            await CreateFollowUpNotification(userId);
         }
     }
 
@@ -391,6 +392,69 @@ else
         hasSubmitted = false;
         score = 0;
         showAnswers = false;
+    }
+
+    // NOTE TO SELF: Kom ihåg att ändra från 1 till 14
+    // Creates a follow-up notification 14 days after onboarding is fully completed
+    private async Task CreateFollowUpNotification(string userId)
+    {
+        var user = await Db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user is null)
+        {
+            return;
+        }
+
+        // Check if all modules are completed
+        var totalModules = await Db.Modules.CountAsync();
+
+        var completedModules = await Db.UserModuleProgresses
+            .CountAsync(p => p.UserId == userId && p.IsCompleted);
+
+        var allModulesCompleted =
+            totalModules > 0 &&
+            completedModules == totalModules;
+
+        // Check if all checklist items are completed
+        var totalChecklistItems = await Db.ChecklistItems.CountAsync();
+
+        var completedChecklistItems = await Db.Set<UserChecklistItemStatus>()
+            .CountAsync(s =>
+                s.UserId == userId &&
+                s.Status == ChecklistStatus.Completed);
+
+        var checklistCompleted =
+            totalChecklistItems > 0 &&
+            completedChecklistItems == totalChecklistItems;
+
+        // Stop if onboarding is not fully completed
+        if (!allModulesCompleted || !checklistCompleted)
+        {
+            return;
+        }
+
+        // Prevent duplicate follow-up notifications
+        var exists = await Db.AdminNotifications.AnyAsync(n =>
+            n.UserId == userId &&
+            n.Type == "FollowUpDue");
+
+        if (exists)
+        {
+            return;
+        }
+
+        Db.AdminNotifications.Add(new AdminNotification
+        {
+            UserId = userId,
+            Type = "FollowUpDue",
+            Title = "Dags för uppföljning",
+            Message = $"Det är dags att följa upp {user.FirstName} {user.LastName}s inskolning.",
+            DueDate = DateTime.UtcNow.AddDays(1),
+            CreatedAt = DateTime.UtcNow,
+            IsRead = false
+        });
+
+        await Db.SaveChangesAsync();
     }
 
     private void GoBack()
