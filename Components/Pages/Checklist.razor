@@ -25,25 +25,19 @@ else
 {
     @* Checklist progress bar *@
     <ProgressBar Total="@TotalChecklistItems" Completed="@CompletedChecklistItems" />
-        @* Clickable category cards with individual progress bars *@
-        <div class="category-progress-container">
-            @foreach (var category in categories)
-            {
-                <CategoryProgressCard
-                    Category="@category"
-                    Total="@GetTotalForCategory(category)"
-                    Completed="@GetCompletedForCategory(category)"
-                    IsActive="@(selectedCategory == category)"
-                    OnCategoryClick="SetCategory"
-                    Color="@GetCategoryColor(category)"
-                    />
-            }
+    @* Clickable category cards with individual progress bars *@
+    <div class="category-progress-container">
+        @foreach (var category in categories)
+        {
+            <CategoryProgressCard Category="@category" Total="@GetTotalForCategory(category)"
+                                  Completed="@GetCompletedForCategory(category)" IsActive="@(selectedCategory == category)"
+                                  OnCategoryClick="SetCategory" Color="@GetCategoryColor(category)" />
+        }
     </div>
-    
+
     @* Filter buttons based on categories *@
     <div class="filter-buttons">
-        <button class="filter-button @(selectedCategory == "Alla" ? "active" : "")"
-                @onclick='() => SetCategory("Alla")'>
+        <button class="filter-button @(selectedCategory == "Alla" ? "active" : "")" @onclick='() => SetCategory("Alla")'>
             Alla
         </button>
 
@@ -70,16 +64,14 @@ else
             @foreach (var item in sortedChecklistItems)
             {
                 <div @key="item.ChecklistItemId"
-                    class="checklist-card @(GetStatus(item.ChecklistItemId) == ChecklistStatus.Completed ? "completed" : "") @(GetStatus(item.ChecklistItemId) == ChecklistStatus.InProgress ? "in-progress" : "")">
+                     class="checklist-card @(GetStatus(item.ChecklistItemId) == ChecklistStatus.Completed ? "completed" : "") @(GetStatus(item.ChecklistItemId) == ChecklistStatus.InProgress ? "in-progress" : "")">
 
                     @* Card header *@
                     <div class="checklist-card-header">
 
-                        <input type="checkbox"
-                            class="checklist-checkbox"
-                            checked="@(GetStatus(item.ChecklistItemId) == ChecklistStatus.Completed)"
-                            @onclick:stopPropagation
-                            @onchange="(e) => HandleCheckboxChanged(item.ChecklistItemId, e)" />
+                        <input type="checkbox" class="checklist-checkbox"
+                               checked="@(GetStatus(item.ChecklistItemId) == ChecklistStatus.Completed)" @onclick:stopPropagation
+                               @onchange="(e) => HandleCheckboxChanged(item.ChecklistItemId, e)" />
 
                         <div class="checklist-card-title-area">
                             <h4>@item.Title</h4>
@@ -89,9 +81,7 @@ else
                             @* Show start toggle button if item is not completed *@
                             @if (GetStatus(item.ChecklistItemId) != ChecklistStatus.Completed)
                             {
-                                <button type="button"
-                                        class="start-btn"
-                                        @onclick='() => ToggleStarted(item.ChecklistItemId)'
+                                <button type="button" class="start-btn" @onclick='() => ToggleStarted(item.ChecklistItemId)'
                                         aria-label="Toggle start status">
 
                                     @(GetStatus(item.ChecklistItemId) == ChecklistStatus.InProgress
@@ -100,10 +90,8 @@ else
                                 </button>
                             }
                             @* Button with icon to toggle note panel for a checklist item *@
-                            <button type="button"
-                                    class="note-icon-btn @(IsNoteOpen(item.ChecklistItemId) ? "active" : "")"
-                                    @onclick:stopPropagation
-                                    @onclick='() => ToggleNote(item.ChecklistItemId)'
+                            <button type="button" class="note-icon-btn @(IsNoteOpen(item.ChecklistItemId) ? "active" : "")"
+                                    @onclick:stopPropagation @onclick='() => ToggleNote(item.ChecklistItemId)'
                                     aria-label="Öppna anteckningar">
                                 <i class="fa-regular fa-pen-to-square"></i>
                             </button>
@@ -115,37 +103,33 @@ else
                     {
                         <p>@item.Description</p>
                     }
-                    
+
                     @* Current status (controlled by user) *@
                     <small class="status-text">
-                    @if (!string.IsNullOrWhiteSpace(item.Category))
+                        @if (!string.IsNullOrWhiteSpace(item.Category))
                         {
-                            <small class="category"
-                                style="background-color:@GetCategoryColor(item.Category); color:white;">
+                            <small class="category" style="background-color:@GetCategoryColor(item.Category); color:white;">
                                 @item.Category
                             </small>
                         }
                         Status: @GetStatusLabel(item.ChecklistItemId)
                     </small>
 
-                @* Render note panel when opened *@
-                @if (IsNoteOpen(item.ChecklistItemId))
-                {
-                    <div class="note-panel">
-                        <div class="note-divider"></div>
+                    @* Render note panel when opened *@
+                    @if (IsNoteOpen(item.ChecklistItemId))
+                    {
+                        <div class="note-panel">
+                            <div class="note-divider"></div>
 
-                        <div class="note-heading">
-                            <span>Personliga anteckningar:</span>
-                        </div>
-                        <textarea id="note-@item.ChecklistItemId"
-                                class="note-textarea"
-                                placeholder="Skriv dina anteckningar här..."
-                                @bind="BindNote[item.ChecklistItemId]"
-                                @bind:event="oninput"
-                                @onblur="() => SaveNote(item.ChecklistItemId)">
+                            <div class="note-heading">
+                                <span>Personliga anteckningar:</span>
+                            </div>
+                            <textarea id="note-@item.ChecklistItemId" class="note-textarea" placeholder="Skriv dina anteckningar här..."
+                                      @bind="BindNote[item.ChecklistItemId]" @bind:event="oninput"
+                                      @onblur="() => SaveNote(item.ChecklistItemId)">
                         </textarea>
-                        <p class="note-helper-text">Dina anteckningar sparas automatiskt</p>
-                    </div>
+                            <p class="note-helper-text">Dina anteckningar sparas automatiskt</p>
+                        </div>
                     }
                 </div>
             }
@@ -224,7 +208,7 @@ else
                 .ToList();
 
     // Runs when component is initialized
-    // Loads the current user, checklist items, item status and existing notes 
+    // Loads the current user, checklist items, item status and existing notes
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
@@ -248,8 +232,8 @@ else
         userStatuses = await Db.Set<UserChecklistItemStatus>()
             .Where(s => s.UserId == currentUserId)
             .ToListAsync();
-        
-        // Load all saved checklist notes belonging to the current user 
+
+        // Load all saved checklist notes belonging to the current user
         userNotes = await Db.Set<UserNote>()
             .Where(n => n.UserId == currentUserId && n.ChecklistItemId != null)
             .ToListAsync();
@@ -281,7 +265,7 @@ else
     {
         selectedCategory = category;
         UpdateSortedChecklistItems();
-        
+
     }
 
     // Returns the current user's saved status for a checklist item
@@ -291,7 +275,7 @@ else
         return status?.Status ?? ChecklistStatus.NotStarted;
     }
 
-    // Convert enum states into readable text 
+    // Convert enum states into readable text
     private string GetStatusLabel(int checklistItemId)
     {
         return GetStatus(checklistItemId) switch
@@ -361,7 +345,7 @@ else
         }
     }
 
-    // Set status for when checkbox is clicked 
+    // Set status for when checkbox is clicked
     private async Task HandleCheckboxChanged(int checklistItemId, ChangeEventArgs e)
     {
         bool isChecked = (bool)e.Value!;
@@ -369,11 +353,73 @@ else
         if (isChecked)
         {
             await SetStatus(checklistItemId, ChecklistStatus.Completed);
+            await CheckAndCreateChecklistNotification();
         }
         else
         {
             await SetStatus(checklistItemId, ChecklistStatus.NotStarted);
         }
+    }
+
+    // Checks if the user has completed the full checklist and creates an admin notification if needed
+    private async Task CheckAndCreateChecklistNotification()
+    {
+        var totalItems = await Db.ChecklistItems.CountAsync();
+
+        var completedItems = await Db.Set<UserChecklistItemStatus>()
+            .CountAsync(s =>
+                s.UserId == currentUserId &&
+                s.Status == ChecklistStatus.Completed);
+
+        if (totalItems == 0 || completedItems < totalItems)
+        {
+            return;
+        }
+
+        var user = await Db.Users.FirstOrDefaultAsync(u => u.Id == currentUserId);
+
+        if (user is null)
+        {
+            return;
+        }
+
+        await CreateAdminNotificationIfMissing(
+            currentUserId,
+            "ChecklistCompleted",
+            "Checklista slutförd",
+            $"{user.FirstName} {user.LastName} har slutfört alla punkter i checklistan.",
+            DateTime.UtcNow);
+    }
+
+    // Creates an admin notification only if the same notification does not already exist
+    private async Task CreateAdminNotificationIfMissing(
+        string userId,
+        string type,
+        string title,
+        string message,
+        DateTime dueDate)
+    {
+        var exists = await Db.AdminNotifications.AnyAsync(n =>
+            n.UserId == userId &&
+            n.Type == type);
+
+        if (exists)
+        {
+            return;
+        }
+
+        Db.AdminNotifications.Add(new AdminNotification
+        {
+            UserId = userId,
+            Type = type,
+            Title = title,
+            Message = message,
+            DueDate = dueDate,
+            CreatedAt = DateTime.UtcNow,
+            IsRead = false
+        });
+
+        await Db.SaveChangesAsync();
     }
 
     // Map checklist status to a numeric value used for sorting
@@ -440,8 +486,8 @@ else
     // Color mapping for categories
     private Dictionary<string, string> categoryColors = new()
     {
-        { "Bad", "#3b82f6" }, 
-        { "Reception", "#10b981" }, 
+        { "Bad", "#3b82f6" },
+        { "Reception", "#10b981" },
         { "Spa", "#f59e0b" },
     };
 
