@@ -1,0 +1,79 @@
+@using Microsoft.EntityFrameworkCore
+@using OnboardingApp.Data
+@using OnboardingApp.Models
+
+@inject ApplicationDbContext Db
+
+<section class="admin-notification-panel">
+    <div class="notification-panel-header">
+        <div>
+            <h2>Notiser</h2>
+            <p>Påminnelser kopplade till inskolning.</p>
+        </div>
+
+        <span class="notification-count">@unreadCount</span>
+    </div>
+
+    @if (notifications.Count == 0)
+    {
+        <p class="empty-notifications">Inga notiser just nu.</p>
+    }
+    else
+    {
+        <div class="notification-list">
+            @foreach (var notification in notifications)
+            {
+                <article class="notification-item @(notification.IsRead ? "read" : "unread")">
+                    <div>
+                        <h3>@notification.Title</h3>
+                        <p>@notification.Message</p>
+                        <small>Förfaller: @notification.DueDate.ToString("yyyy-MM-dd")</small>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</section>
+
+@code {
+    // Stores the latest notifications shown in panel
+    private List<OnboardingApp.Models.AdminNotification> notifications = new();
+    
+    // Unread notifications
+    private int unreadCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Temporary test notification to adjust styling
+        if (!await Db.AdminNotifications.AnyAsync())
+        {
+            var user = await Db.Users.FirstOrDefaultAsync();
+
+            if (user is not null)
+            {
+                Db.AdminNotifications.Add(new OnboardingApp.Models.AdminNotification
+                {
+                    UserId = user.Id,
+                    Title = "Testnotis",
+                    Message = $"{user.FirstName} {user.LastName} har slutfört alla moduler.",
+                    DueDate = DateTime.UtcNow,
+                    CreatedAt = DateTime.UtcNow,
+                    IsRead = false,
+                    Type = "Test"
+                });
+
+                await Db.SaveChangesAsync();
+            }
+        }
+
+        // Load the latest notifications
+        notifications = await Db.AdminNotifications
+            .OrderBy(n => n.IsRead)
+            .ThenBy(n => n.DueDate)
+            .Take(5)
+            .ToListAsync();
+
+        // Count unread notifications
+        unreadCount = notifications.Count(n => !n.IsRead);
+    }
+}
