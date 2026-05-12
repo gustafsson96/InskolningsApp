@@ -1,0 +1,115 @@
+.admin-form-card {
+    background: #fff;
+    border: 1px solid #e4e7ec;
+    border-radius: 18px;
+    padding: 1.5em;
+    margin-bottom: 1.5em;
+    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.04);
+}
+
+.admin-form-header {
+    margin-bottom: 1.25em;
+}
+
+.admin-form-header h2 {
+    margin: 0 0 0.25em 0;
+    font-size: 1.5em;
+    color: #101828;
+}
+
+.admin-form-header p {
+    margin: 0;
+    color: #667085;
+}
+
+.admin-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1em;
+}
+
+.admin-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75em;
+    margin-top: 1.25em;
+    padding-top: 1.25em;
+    border-top: 1px solid #e4e7ec;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+}
+
+.form-field label {
+    font-weight: 600;
+    color: #344054;
+    font-size: 0.95em;
+}
+
+.form-field input,
+.form-field select {
+    border: 1px solid #d0d5dd;
+    border-radius: 10px;
+    padding: 0.75em 0.85em;
+    font: inherit;
+    color: #101828;
+    background: #fff;
+}
+
+.form-field input:focus,
+.form-field select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.primary-button,
+.secondary-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    border-radius: 10px;
+    padding: 0.75em 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+    font: inherit;
+}
+
+.primary-button {
+    border: none;
+    background: #2563eb;
+    color: #fff;
+}
+
+.primary-button:hover {
+    background: #1d4ed8;
+}
+
+.secondary-button {
+    border: 1px solid #d0d5dd;
+    background: #fff;
+    color: #344054;
+}
+
+.secondary-button:hover {
+    background: #f9fafb;
+}
+
+@media (max-width: 900px) {
+    .admin-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-form-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .admin-form-actions button {
+        justify-content: center;
+    }
+}
