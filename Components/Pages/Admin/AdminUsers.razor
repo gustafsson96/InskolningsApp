@@ -160,16 +160,20 @@
 
                                         @foreach (var module in modules)
                                         {
-                                            var completed = IsModuleCompleted(user.Id, module.ModuleId);
+                                            bool completed = IsModuleCompleted(user.Id, module.ModuleId);
 
-                                            <div class="module-status-bar-row">
-                                                <div class="module-status-bar-header">
+                                            <div class="module-progress-card">
+                                                <div class="module-progress-header">
                                                     <span>@module.Title</span>
-                                                    <strong>@(completed ? "Avklarad" : "Ej avklarad")</strong>
+
+                                                    <span class="module-progress-percent">
+                                                        @(completed ? "100%" : "0%")
+                                                    </span>
+
                                                 </div>
 
-                                                <div class="module-status-track">
-                                                    <div class="module-status-fill @(completed ? "completed" : "not-completed")"
+                                                <div class="module-progress-track">
+                                                    <div class="module-progress-fill @(completed ? "completed": "")"
                                                          style="width: @(completed ? 100 : 0)%">
                                                     </div>
                                                 </div>
