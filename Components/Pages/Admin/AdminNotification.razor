@@ -29,6 +29,9 @@
                         <p>@notification.Message</p>
                         <small>Förfaller: @notification.DueDate.ToString("yyyy-MM-dd")</small>
                     </div>
+                    <button class="notification-dismiss" title="Markera som läst" @onclick="() => MarkAsRead(notification)">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
                 </article>
             }
         </div>
@@ -38,7 +41,7 @@
 @code {
     // Stores the latest notifications shown in panel
     private List<OnboardingApp.Models.AdminNotification> notifications = new();
-    
+
     // Unread notifications
     private int unreadCount;
 
@@ -74,6 +77,17 @@
             .ToListAsync();
 
         // Count unread notifications
+        unreadCount = notifications.Count(n => !n.IsRead);
+    }
+
+    // Mark a notification as read when x-button is clicked
+    private async Task MarkAsRead(OnboardingApp.Models.AdminNotification notification)
+    {
+        notification.IsRead = true;
+
+        await Db.SaveChangesAsync();
+
+        notifications.Remove(notification);
         unreadCount = notifications.Count(n => !n.IsRead);
     }
 }

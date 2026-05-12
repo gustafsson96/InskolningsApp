@@ -49,6 +49,10 @@
     border-radius: 14px;
     padding: 0.9em 1em;
     background: #fcfcfd;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1em;
 }
 
 .notification-item.unread {
@@ -74,4 +78,29 @@
 .empty-notifications {
     margin: 0;
     color: #667085;
+}
+
+.notification-dismiss {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: #98a2b3;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.notification-dismiss:hover {
+    background: #eef2ff;
+    color: #2563eb;
+    transform: scale(1.05);
+}
+
+.notification-dismiss i {
+    font-size: 1em;
 }
