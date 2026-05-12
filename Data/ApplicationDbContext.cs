@@ -19,5 +19,6 @@ namespace OnboardingApp.Data
         public DbSet<QuizOption> QuizOptions { get; set; }
         public DbSet<QuizAttempt> QuizAttempts { get; set; }
         public DbSet<QuizAnswer> QuizAnswers { get; set; }
+        public DbSet<AdminNotification> AdminNotifications => Set<AdminNotification>();
     }
 }
