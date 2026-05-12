@@ -501,8 +501,7 @@ else
         return "#9ca3af";
     }
 
-    // NOTE TO SELF: Kom ihåg att ändra tid från 1 till 14
-    // Creates a follow-up notification 14 (set to 1 for testing) days after onboarding is fully completed
+    // Creates a follow-up notification 14 days after onboarding is fully completed
     private async Task CreateFollowUpNotification(string userId)
     {
         var user = await Db.Users.FirstOrDefaultAsync(u => u.Id == userId);
@@ -556,7 +555,7 @@ else
             Type = "FollowUpDue",
             Title = "Dags för uppföljning",
             Message = $"Det är dags att följa upp {user.FirstName} {user.LastName}s inskolning.",
-            DueDate = DateTime.UtcNow.AddDays(1),
+            DueDate = DateTime.UtcNow.AddDays(14),
             CreatedAt = DateTime.UtcNow,
             IsRead = false
         });
