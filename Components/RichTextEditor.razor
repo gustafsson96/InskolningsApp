@@ -1,0 +1,107 @@
+@using Microsoft.AspNetCore.Components.Forms
+@inject IJSRuntime JS
+@inject IWebHostEnvironment Environment
+
+<div class="rich-text-editor-wrapper">
+    <!-- Quill editor container -->
+    <div id="@editorId" class="quill-editor"></div>
+
+    @if (AllowImages)
+    {
+        <!-- Image upload -->
+        <div class="rich-text-image-upload">
+            <label>Bild</label>
+            <InputFile OnChange="UploadImage" accept="image/*" />
+        </div>
+    }
+</div>
+
+@code {
+    // Current editor value (HTML)
+    [Parameter]
+    public string Value { get; set; } = string.Empty;
+
+    // Enables two-way binding
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    // Toggle image upload support
+    [Parameter]
+    public bool AllowImages { get; set; } = true;
+
+    // Unique id for the Quill instance
+    private readonly string editorId = $"editor-{Guid.NewGuid()}";
+
+    // Create Quill editor after component has rendered
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync(
+                "quillEditor.create",
+                editorId,
+                Value ?? ""
+            );
+        }
+    }
+
+    // Fetch current HTML content from Quill
+    public async Task UpdateValue()
+    {
+        var html = await JS.InvokeAsync<string>(
+            "quillEditor.getHtml",
+            editorId
+        );
+
+        Value = html;
+
+        await ValueChanged.InvokeAsync(html);
+    }
+
+    // Upload image and insert into editor
+    private async Task UploadImage(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+
+        if (file is null)
+        {
+            return;
+        }
+
+        // Create uploads folder if it does not exist
+        var uploadsFolder = Path.Combine(
+            Environment.WebRootPath,
+            "uploads",
+            "sections"
+        );
+
+        Directory.CreateDirectory(uploadsFolder);
+
+        // Generate unique filename
+        var extension = Path.GetExtension(file.Name);
+        var fileName = $"{Guid.NewGuid()}{extension}";
+        var filePath = Path.Combine(uploadsFolder, fileName);
+
+        // Save uploaded file
+        await using var stream = file.OpenReadStream(
+            maxAllowedSize: 5 * 1024 * 1024
+        );
+
+        await using var fileStream = File.Create(filePath);
+
+        await stream.CopyToAsync(fileStream);
+
+        // Public image url
+        var imageUrl = $"/uploads/sections/{fileName}";
+
+        // Insert image into Quill editor
+        await JS.InvokeVoidAsync(
+            "quillEditor.insertImage",
+            editorId,
+            imageUrl
+        );
+
+        // Sync updated editor content with Blazor
+        await UpdateValue();
+    }
+}
