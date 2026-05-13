@@ -332,6 +332,14 @@
     background: #f9fafb;
 }
 
+.module-content-body img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 12px;
+    margin: 1.5em 0;
+}
+
 @media (max-width: 700px) {
     .admin-page-header,
     .module-card-top {

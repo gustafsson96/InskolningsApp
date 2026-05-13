@@ -113,8 +113,7 @@
                         </div>
 
                         <div class="module-card-links">
-                            <button class="secondary-button add-section-button"
-                                    @onclick="() => ToggleSectionForm(module.ModuleId)">
+                            <button class="secondary-button add-section-button" @onclick="() => ToggleSectionForm(module.ModuleId)">
                                 <i class="fa-solid fa-plus"></i>
                                 Lägg till sektion
                             </button>
@@ -139,7 +138,8 @@
 
                                 <div class="form-group">
                                     <label>Innehåll</label>
-                                    <textarea class="section-content-textarea" @bind="sectionForm.Content"></textarea>
+                                    <RichTextEditor @ref="sectionEditors[module.ModuleId]" @bind-Value="sectionForm.Content"
+                                                    AllowImages="true" />
                                 </div>
 
                                 <div class="form-actions">
@@ -199,6 +199,7 @@
     private bool showCreateForm = false;
     private int? openSectionFormId;
     private HashSet<int> expandedSections = new();
+    private Dictionary<int, RichTextEditor?> sectionEditors = new();
 
     // View model for a new section
     private class NewSectionModel
@@ -378,6 +379,12 @@
     {
         var form = GetSectionForm(moduleId);
 
+        // Sync current Quill content to the section form model
+        if (sectionEditors.TryGetValue(moduleId, out var editor))
+        {
+            await editor.UpdateValue();
+        }
+
         if (string.IsNullOrWhiteSpace(form.Title) || string.IsNullOrWhiteSpace(form.Content))
         {
             sectionMessage = "Sektionens titel och innehåll måste anges.";
@@ -400,6 +407,8 @@
         await Db.SaveChangesAsync();
 
         newSections[moduleId] = new NewSectionModel();
+        sectionEditors.Remove(moduleId);
+        openSectionFormId = null;
         sectionMessage = "Sektionen skapades.";
 
         await LoadModules();
