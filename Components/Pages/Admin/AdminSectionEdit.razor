@@ -42,7 +42,7 @@
 
             <div class="form-group">
                 <label>Innehåll</label>
-                <textarea class="section-edit-textarea" @bind="section.Content"></textarea>
+                <RichTextEditor @ref="sectionEditor" @bind-Value="section.Content" AllowImages="true" />
             </div>
 
             <div class="form-actions">
@@ -75,6 +75,8 @@
 
     // Status/error message
     private string? message;
+    // Rich text editor reference
+    private RichTextEditor? sectionEditor;
 
     // Load section on page load
     protected override async Task OnInitializedAsync()
@@ -92,6 +94,12 @@
         if (section is null)
         {
             return;
+        }
+
+        // Sync current Quill content to the section model
+        if (sectionEditor is not null)
+        {
+            await sectionEditor.UpdateValue();
         }
 
         // Validate required fields
