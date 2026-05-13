@@ -137,9 +137,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Innehåll</label>
-                                    <RichTextEditor @ref="sectionEditors[module.ModuleId]" @bind-Value="sectionForm.Content"
-                                                    AllowImages="true" />
+                                    <RichTextEditor @ref="sectionEditor" @bind-Value="sectionForm.Content" AllowImages="true" />
                                 </div>
 
                                 <div class="form-actions">
@@ -199,7 +197,7 @@
     private bool showCreateForm = false;
     private int? openSectionFormId;
     private HashSet<int> expandedSections = new();
-    private Dictionary<int, RichTextEditor?> sectionEditors = new();
+    private RichTextEditor? sectionEditor;
 
     // View model for a new section
     private class NewSectionModel
@@ -380,9 +378,9 @@
         var form = GetSectionForm(moduleId);
 
         // Sync current Quill content to the section form model
-        if (sectionEditors.TryGetValue(moduleId, out var editor))
+        if (sectionEditor is not null)
         {
-            await editor.UpdateValue();
+            await sectionEditor.UpdateValue();
         }
 
         if (string.IsNullOrWhiteSpace(form.Title) || string.IsNullOrWhiteSpace(form.Content))
@@ -407,7 +405,7 @@
         await Db.SaveChangesAsync();
 
         newSections[moduleId] = new NewSectionModel();
-        sectionEditors.Remove(moduleId);
+        sectionEditor = null;
         openSectionFormId = null;
         sectionMessage = "Sektionen skapades.";
 
