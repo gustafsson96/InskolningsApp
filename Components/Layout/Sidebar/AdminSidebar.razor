@@ -46,11 +46,14 @@
     <!-- Actions -->
     <div class="admin-sidebar-bottom">
         <button class="admin-btn back-btn" @onclick="GoBack">
-            ← Avsluta admin
+            ← Visa användarvy
         </button>
-        <button class="admin-btn logout-btn">
-            Logga ut
-        </button>
+            <form method="post" action="/logout">
+                <button type="submit" class="admin-btn logout-btn">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    Logga ut
+                </button>
+            </form>
     </div>
 </div>
 
