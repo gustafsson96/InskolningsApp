@@ -122,11 +122,30 @@
                             </button>
 
                             <button class="icon-button danger" title="Ta bort" type="button"
-                                    @onclick="() => DeleteChecklistItem(item.ChecklistItemId)">
+                                    @onclick="() => AskDeleteChecklistItem(item)">
 
                                 <i class="fa-regular fa-trash-can"></i>
                             </button>
                         </div>
+
+                        @if (checklistItemIdPendingDelete == item.ChecklistItemId)
+                        {
+                            <div class="delete-confirm-box">
+                                <p>
+                                    Vill du radera <strong>@checklistTitlePendingDelete</strong>?
+                                </p>
+
+                                <div class="delete-confirm-actions">
+                                    <button class="secondary-button" @onclick="CancelDeleteChecklistItem">
+                                        Avbryt
+                                    </button>
+
+                                    <button class="danger-button" @onclick="ConfirmDeleteChecklistItem">
+                                        Ja, radera checklistpunkten
+                                    </button>
+                                </div>
+                            </div>
+                        }
 
                         @if (openEditChecklistId == item.ChecklistItemId)
                         {
@@ -187,6 +206,8 @@
     // State of create form
     private bool showCreateForm = false;
     private int? openEditChecklistId;
+    private int? checklistItemIdPendingDelete;
+    private string? checklistTitlePendingDelete;
 
     // Simple form model used for both create and edit operations
     private class ChecklistFormModel
@@ -324,6 +345,31 @@
         checklistMessage = "Checklistpunkten uppdaterades.";
 
         await LoadData();
+    }
+
+    private void AskDeleteChecklistItem(ChecklistItem item)
+    {
+        checklistItemIdPendingDelete = item.ChecklistItemId;
+        checklistTitlePendingDelete = item.Title;
+    }
+
+    private void CancelDeleteChecklistItem()
+    {
+        checklistItemIdPendingDelete = null;
+        checklistTitlePendingDelete = null;
+    }
+
+    private async Task ConfirmDeleteChecklistItem()
+    {
+        if (checklistItemIdPendingDelete is null)
+        {
+            return;
+        }
+
+        await DeleteChecklistItem(checklistItemIdPendingDelete.Value);
+
+        checklistItemIdPendingDelete = null;
+        checklistTitlePendingDelete = null;
     }
 
     // Deletes a checklist item and related data
