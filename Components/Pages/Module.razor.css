@@ -146,3 +146,13 @@
     background-color: #cfcfcf;
     cursor: not-allowed;
 }
+
+::deep .module-content-body img {
+    max-width: 100%;
+    max-height: 450px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    margin: 1em;
+}
