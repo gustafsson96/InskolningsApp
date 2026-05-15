@@ -23,7 +23,13 @@
 
     @if (!string.IsNullOrWhiteSpace(message))
     {
-        <p class="admin-message">@message</p>
+        <div class="admin-alert">
+            <span>@message</span>
+
+            <button class="alert-close-button" @onclick="ClearMessage">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
     }
 
     @if (showCreateForm)
@@ -110,7 +116,7 @@
                                 <i class="fa-regular fa-trash-can"></i>
                             </button>
                         </div>
-                        
+
                         @if (openEditChecklistId == item.ChecklistItemId)
                         {
                             <div class="edit-checklist-form">
@@ -361,5 +367,11 @@
         {
             openEditChecklistId = checklistItemId;
         }
+    }
+
+    // Clear feedback message
+    private void ClearMessage()
+    {
+        message = null;
     }
 }
