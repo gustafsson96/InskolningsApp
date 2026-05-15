@@ -147,11 +147,31 @@
                                         Redigera uppgifter
                                     </button>
 
-                                    <button class="danger-button" @onclick="() => DeleteUser(user.Id)">
+                                    <button class="danger-button" @onclick="() => AskDeleteUser(user)">
                                         <i class="fa-solid fa-trash"></i>
                                         Ta bort användare
                                     </button>
                                 </div>
+
+                                @if (userIdPendingDelete == user.Id)
+                                {
+                                    <div class="delete-confirm-box">
+                                        <p>
+                                            Vill du radera <strong>@userNamePendingDelete</strong>?
+                                            Detta kan inte ångras.
+                                        </p>
+
+                                        <div class="delete-confirm-actions">
+                                            <button class="secondary-button" @onclick="CancelDeleteUser">
+                                                Avbryt
+                                            </button>
+
+                                            <button class="danger-button" @onclick="ConfirmDeleteUser">
+                                                Ja, radera användaren
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
 
                                 @if (detailsUserId == user.Id)
                                 {
@@ -173,7 +193,7 @@
                                                 </div>
 
                                                 <div class="module-progress-track">
-                                                    <div class="module-progress-fill @(completed ? "completed": "")"
+                                                    <div class="module-progress-fill @(completed ? "completed" : "")"
                                                          style="width: @(completed ? 100 : 0)%">
                                                     </div>
                                                 </div>
@@ -249,9 +269,13 @@
     private string? activeUserPanelId;
     private string? detailsUserId;
     private string? editingUserId;
+    private string? userIdPendingDelete;
+    private string? userNamePendingDelete;
     private List<ModuleModel> modules = new();
     private List<UserModuleProgress> moduleProgresses = new();
 
+    
+    
     // Form model when editing users
     private class UserFormModel
     {
@@ -490,6 +514,39 @@
         await LoadUsers();
 
         editingUserId = null;
+    }
+
+    // Ask for confirmation before deleting a user
+    private void AskDeleteUser(ApplicationUser user)
+    {
+        userIdPendingDelete = user.Id;
+        userNamePendingDelete = $"{user.FirstName} {user.LastName}".Trim();
+
+        if (string.IsNullOrWhiteSpace(userNamePendingDelete))
+        {
+            userNamePendingDelete = user.Email;
+        }
+    }
+
+    // Cancel user delete confirmation
+    private void CancelDeleteUser()
+    {
+        userIdPendingDelete = null;
+        userNamePendingDelete = null;
+    }
+
+    // Confirm and delete selected user
+    private async Task ConfirmDeleteUser()
+    {
+        if (string.IsNullOrWhiteSpace(userIdPendingDelete))
+        {
+            return;
+        }
+
+        await DeleteUser(userIdPendingDelete);
+
+        userIdPendingDelete = null;
+        userNamePendingDelete = null;
     }
 
     // Deletes a user from Identity

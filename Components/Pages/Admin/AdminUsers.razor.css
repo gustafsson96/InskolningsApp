@@ -411,6 +411,26 @@
     background: #f9fafb;
 }
 
+.delete-confirm-box {
+    margin-top: 1em;
+    padding: 1em;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+    background: #fef2f2;
+}
+
+.delete-confirm-box p {
+    margin: 0 0 1em 0;
+    color: #7f1d1d;
+}
+
+.delete-confirm-actions {
+    display: flex;
+    gap: 0.75em;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
 @media (max-width: 900px) {
     .admin-user-stats {
         grid-template-columns: 1fr;
