@@ -8,10 +8,13 @@
 
     @if (AllowImages)
     {
-        <!-- Image upload -->
         <div class="rich-text-image-upload">
-            <label>Bild</label>
-            <InputFile OnChange="UploadImage" accept="image/*" />
+            <label class="image-upload-button">
+                <i class="fa-regular fa-image"></i>
+                Lägg till bild
+
+                <InputFile class="hidden-file-input" OnChange="UploadImage" accept="image/*" />
+            </label>
         </div>
     }
 </div>

@@ -1,3 +1,30 @@
+.rich-text-image-upload {
+    margin-top: 0.75em;
+}
+
+.image-upload-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    width: fit-content;
+    border: 1px solid #d0d5dd;
+    border-radius: 10px;
+    padding: 0.65em 0.9em;
+    background: #ffffff;
+    color: #344054;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.image-upload-button:hover {
+    background: #f9fafb;
+    border-color: #98a2b3;
+}
+
+::deep .hidden-file-input {
+    display: none;
+}
+
 .quill-editor img,
 .ql-editor img {
     max-width: 500px;
