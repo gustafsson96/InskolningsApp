@@ -137,7 +137,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <RichTextEditor @ref="sectionEditor" @bind-Value="sectionForm.Content" AllowImages="true" />
+                                    <RichTextEditor @key="module.ModuleId" @ref="sectionEditor" @bind-Value="sectionForm.Content" AllowImages="true" />
                                 </div>
 
                                 <div class="form-actions">
