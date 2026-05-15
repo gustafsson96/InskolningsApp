@@ -21,15 +21,21 @@
         </button>
     </div>
 
-    @if (!string.IsNullOrWhiteSpace(moduleMessage))
-    {
-        <p class="admin-message">@moduleMessage</p>
-    }
-
     @if (showCreateForm)
     {
         <section class="admin-form-card">
             <h2>Skapa ny modul</h2>
+
+            @if (!string.IsNullOrWhiteSpace(createModuleMessage))
+            {
+                <div class="admin-alert">
+                    <span>@createModuleMessage</span>
+
+                    <button class="alert-close-button" @onclick="ClearCreateModuleMessage">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            }
 
             <div class="form-group">
                 <label for="title">Titel</label>
@@ -46,6 +52,17 @@
                 <button class="secondary-button" @onclick="ToggleCreateForm">Avbryt</button>
             </div>
         </section>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(moduleListMessage))
+    {
+        <div class="admin-alert">
+            <span>@moduleListMessage</span>
+
+            <button class="alert-close-button" @onclick="ClearModuleListMessage">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
     }
 
     @if (modules.Count == 0)
@@ -127,9 +144,14 @@
                         <div class="add-section-details">
                             @if (!string.IsNullOrWhiteSpace(sectionMessage))
                             {
-                                <p class="admin-message">@sectionMessage</p>
-                            }
+                                <div class="admin-alert">
+                                    <span>@sectionMessage</span>
 
+                                    <button class="alert-close-button" @onclick="ClearSectionMessage">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+                            }
                             <div class="section-form">
                                 <div class="form-group">
                                     <label>Titel</label>
@@ -137,7 +159,8 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <RichTextEditor @key="module.ModuleId" @ref="sectionEditor" @bind-Value="sectionForm.Content" AllowImages="true" />
+                                    <RichTextEditor @key="module.ModuleId" @ref="sectionEditor" @bind-Value="sectionForm.Content"
+                                                    AllowImages="true" />
                                 </div>
 
                                 <div class="form-actions">
@@ -192,12 +215,15 @@
     private Module newModule = new();
     private int? editingModuleId;
     private Module editModule = new();
-    private string? moduleMessage;
+    private string? createModuleMessage;
+    private string? moduleListMessage;
     private string? sectionMessage;
     private bool showCreateForm = false;
     private int? openSectionFormId;
     private HashSet<int> expandedSections = new();
     private RichTextEditor? sectionEditor;
+    private int? moduleIdPendingDelete;
+    private string? moduleTitlePendingDelete;
 
     // View model for a new section
     private class NewSectionModel
@@ -237,7 +263,7 @@
     {
         if (string.IsNullOrWhiteSpace(newModule.Title))
         {
-            moduleMessage = "Titel måste anges.";
+            createModuleMessage = "Titel måste anges.";
             return;
         }
 
@@ -256,7 +282,7 @@
 
         newModule = new Module();
         showCreateForm = false;
-        moduleMessage = "Modulen skapades.";
+        createModuleMessage = "Modulen skapades.";
 
         await LoadModules();
     }
@@ -282,13 +308,13 @@
 
         if (module is null)
         {
-            moduleMessage = "Modulen kunde inte hittas.";
+            moduleListMessage = "Modulen kunde inte hittas.";
             return;
         }
 
         if (string.IsNullOrWhiteSpace(editModule.Title))
         {
-            moduleMessage = "Titel måste anges.";
+            moduleListMessage = "Titel måste anges.";
             return;
         }
 
@@ -300,7 +326,7 @@
 
         editingModuleId = null;
         editModule = new Module();
-        moduleMessage = "Modulen uppdaterades.";
+        moduleListMessage = "Modulen uppdaterades.";
 
         await LoadModules();
     }
@@ -321,7 +347,7 @@
 
         if (module is null)
         {
-            moduleMessage = "Modulen kunde inte hittas.";
+            moduleListMessage = "Modulen kunde inte hittas.";
             return;
         }
 
@@ -333,7 +359,7 @@
         Db.Modules.Remove(module);
         await Db.SaveChangesAsync();
 
-        moduleMessage = "Modulen och dess sektioner togs bort.";
+        moduleListMessage = "Modulen och dess sektioner togs bort.";
         await LoadModules();
     }
 
@@ -410,5 +436,20 @@
         sectionMessage = "Sektionen skapades.";
 
         await LoadModules();
+    }
+
+    private void ClearCreateModuleMessage()
+    {
+        createModuleMessage = null;
+    }
+
+    private void ClearModuleListMessage()
+    {
+        moduleListMessage = null;
+    }
+
+    private void ClearSectionMessage()
+    {
+        sectionMessage = null;
     }
 }
