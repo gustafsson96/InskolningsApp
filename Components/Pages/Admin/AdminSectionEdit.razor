@@ -54,10 +54,29 @@
                     Avbryt
                 </button>
 
-                <button class="secondary-button danger-button" @onclick="DeleteSection">
+                <button class="secondary-button danger-button" @onclick="AskDeleteSection">
                     Ta bort sektion
                 </button>
             </div>
+            @if (showDeleteConfirm)
+            {
+                <div class="delete-confirm-box">
+                    <p>
+                        Vill du radera <strong>@(section?.Title ?? "sektionen")</strong>?
+                        Detta kan inte ångras.
+                    </p>
+
+                    <div class="delete-confirm-actions">
+                        <button class="secondary-button" @onclick="CancelDeleteSection">
+                            Avbryt
+                        </button>
+
+                        <button class="danger-button" @onclick="DeleteSection">
+                            Ja, radera sektion
+                        </button>
+                    </div>
+                </div>
+            }
         </section>
     }
 </div>
@@ -77,6 +96,9 @@
     private string? message;
     // Rich text editor reference
     private RichTextEditor? sectionEditor;
+
+    // Controls delete confirmation for the section
+    private bool showDeleteConfirm = false;
 
     // Load section on page load
     protected override async Task OnInitializedAsync()
@@ -112,6 +134,18 @@
 
         await Db.SaveChangesAsync();
         message = "Sektionen uppdaterades.";
+    }
+
+    // Opens delete confirmation for the section
+    private void AskDeleteSection()
+    {
+        showDeleteConfirm = true;
+    }
+
+    // Cancels section deletion
+    private void CancelDeleteSection()
+    {
+        showDeleteConfirm = false;
     }
 
     // Delete section
