@@ -111,11 +111,31 @@
                                     <i class="fa-regular fa-pen-to-square"></i>
                                 </button>
 
-                                <button class="icon-button danger" title="Ta bort" @onclick="() => DeleteModule(module.ModuleId)">
+                                <button class="icon-button danger" title="Ta bort" @onclick="() => AskDeleteModule(module)">
                                     <i class="fa-regular fa-trash-can"></i>
                                 </button>
                             </div>
                         </div>
+
+                        @if (moduleIdPendingDelete == module.ModuleId)
+                        {
+                            <div class="delete-confirm-box">
+                                <p>
+                                    Vill du radera <strong>@moduleTitlePendingDelete</strong>?
+                                    Alla sektioner och quizfrågor kopplade till modulen tas också bort.
+                                </p>
+
+                                <div class="delete-confirm-actions">
+                                    <button class="secondary-button" @onclick="CancelDeleteModule">
+                                        Avbryt
+                                    </button>
+
+                                    <button class="danger-button" @onclick="ConfirmDeleteModule">
+                                        Ja, radera modul
+                                    </button>
+                                </div>
+                            </div>
+                        }
 
                         <div class="module-meta">
                             <span>
@@ -336,6 +356,34 @@
     {
         editingModuleId = null;
         editModule = new Module();
+    }
+
+    // Open delete confirmation for a module
+    private void AskDeleteModule(Module module)
+    {
+        moduleIdPendingDelete = module.ModuleId;
+        moduleTitlePendingDelete = module.Title;
+    }
+
+    // Cancel module deletion
+    private void CancelDeleteModule()
+    {
+        moduleIdPendingDelete = null;
+        moduleTitlePendingDelete = null;
+    }
+
+    // Deletes the selected module after confirmation
+    private async Task ConfirmDeleteModule()
+    {
+        if (moduleIdPendingDelete is null)
+        {
+            return;
+        }
+
+        await DeleteModule(moduleIdPendingDelete.Value);
+
+        moduleIdPendingDelete = null;
+        moduleTitlePendingDelete = null;
     }
 
     // Delete a module and its sections
