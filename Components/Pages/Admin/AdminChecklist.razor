@@ -21,21 +21,21 @@
         Ny checklistpunkt
     </button>
 
-    @if (!string.IsNullOrWhiteSpace(message))
-    {
-        <div class="admin-alert">
-            <span>@message</span>
-
-            <button class="alert-close-button" @onclick="ClearMessage">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    }
-
     @if (showCreateForm)
     {
         <section class="admin-form-card">
             <h2>Skapa ny checklistpunkt</h2>
+
+            @if (!string.IsNullOrWhiteSpace(createMessage))
+            {
+                <div class="admin-alert">
+                    <span>@createMessage</span>
+
+                    <button class="alert-close-button" @onclick="ClearCreateMessage">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            }
 
             <div class="form-group">
                 <label>Titel</label>
@@ -60,6 +60,17 @@
 
             <button class="primary-button" @onclick="CreateChecklistItem">Lägg till checklistpunkt</button>
         </section>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(checklistMessage))
+    {
+        <div class="admin-alert">
+            <span>@checklistMessage</span>
+
+            <button class="alert-close-button" @onclick="ClearChecklistMessage">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
     }
 
     <section class="checklist-list-section">
@@ -164,7 +175,8 @@
     private List<Module> modules = new();
 
     // Feedback message shown to admin after actions
-    private string? message;
+    private string? createMessage;
+    private string? checklistMessage;
 
     // Model used when creating a new checklist item
     private ChecklistFormModel newItem = new();
@@ -236,14 +248,14 @@
         // Validate title
         if (string.IsNullOrWhiteSpace(newItem.Title))
         {
-            message = "Titel måste anges.";
+            createMessage = "Titel måste anges.";
             return;
         }
 
         // Validate category
         if (string.IsNullOrWhiteSpace(newItem.Category))
         {
-            message = "Kategori måste väljas.";
+            createMessage = "Kategori måste väljas.";
             return;
         }
 
@@ -266,7 +278,7 @@
         // Reset form
         newItem = new ChecklistFormModel();
 
-        message = "Checklistpunkten skapades.";
+        createMessage = "Checklistpunkten skapades.";
 
         // Reload data
         await LoadData();
@@ -280,14 +292,14 @@
         // Validate title
         if (string.IsNullOrWhiteSpace(form.Title))
         {
-            message = "Titel måste anges.";
+            checklistMessage = "Titel måste anges.";
             return;
         }
 
         // Validate category
         if (string.IsNullOrWhiteSpace(form.Category))
         {
-            message = "Kategori måste väljas.";
+            checklistMessage = "Kategori måste väljas.";
             return;
         }
 
@@ -297,7 +309,7 @@
 
         if (checklistItem is null)
         {
-            message = "Checklistpunkten kunde inte hittas.";
+            checklistMessage = "Checklistpunkten kunde inte hittas.";
             return;
         }
 
@@ -309,7 +321,7 @@
 
         await Db.SaveChangesAsync();
 
-        message = "Checklistpunkten uppdaterades.";
+        checklistMessage = "Checklistpunkten uppdaterades.";
 
         await LoadData();
     }
@@ -323,7 +335,7 @@
 
         if (checklistItem is null)
         {
-            message = "Checklistpunkten kunde inte hittas.";
+            checklistMessage = "Checklistpunkten kunde inte hittas.";
             return;
         }
 
@@ -345,7 +357,7 @@
 
         await Db.SaveChangesAsync();
 
-        message = "Checklistpunkten togs bort.";
+        checklistMessage = "Checklistpunkten togs bort.";
 
         await LoadData();
     }
@@ -369,9 +381,14 @@
         }
     }
 
-    // Clear feedback message
-    private void ClearMessage()
+    // Clear feedback messages
+    private void ClearCreateMessage()
     {
-        message = null;
+        createMessage = null;
+    }
+
+    private void ClearChecklistMessage()
+    {
+        checklistMessage = null;
     }
 }
