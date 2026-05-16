@@ -11,11 +11,16 @@
     border-radius: 12px 12px 0 0;
 }
 
-.rich-text-image-upload {
+.rich-text-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
     margin-top: 0.75em;
+    flex-wrap: wrap;
 }
 
-.image-upload-button {
+.image-upload-button,
+.video-button {
     display: inline-flex;
     align-items: center;
     gap: 0.5em;
@@ -26,12 +31,18 @@
     background: #ffffff;
     color: #344054;
     font-weight: 600;
+    font: inherit;
     cursor: pointer;
 }
 
-.image-upload-button:hover {
+.image-upload-button:hover,
+.video-button:hover {
     background: #f9fafb;
     border-color: #98a2b3;
+}
+
+.video-button i {
+    color: #ef4444;
 }
 
 ::deep .hidden-file-input {
@@ -47,3 +58,53 @@
     display: block;
 }
 
+.video-popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.video-popup {
+    width: 100%;
+    max-width: 500px;
+    background: white;
+    border-radius: 16px;
+    padding: 1.5em;
+}
+
+.video-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1em;
+}
+
+.video-popup-header h3 {
+    margin: 0;
+}
+
+.close-popup-button {
+    border: none;
+    background: transparent;
+    font-size: 1.1em;
+    cursor: pointer;
+}
+
+.youtube-input {
+    width: 100%;
+    border: 1px solid #d0d5dd;
+    border-radius: 10px;
+    padding: 0.75em 1em;
+    margin-bottom: 1em;
+    font: inherit;
+}
+
+.video-popup-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75em;
+}

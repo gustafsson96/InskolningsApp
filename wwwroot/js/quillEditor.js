@@ -51,5 +51,46 @@ window.quillEditor = {
 
         const range = quill.getSelection(true);
         quill.insertEmbed(range.index, "image", imageUrl);
+    },
+
+    // Insert YouTube iframe into editor
+    insertYoutube: function (editorId, url) {
+        const quill = window.quillEditors[editorId];
+
+        if (!quill) {
+            return;
+        }
+
+        // Extract video id from YouTube url
+        const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/;
+        const match = url.match(regex);
+
+        // Stop if url is invalid
+        if (!match) {
+            alert("Ogiltig YouTube-länk.");
+            return;
+        }
+
+        const videoId = match[1];
+
+        // Responsive YouTube iframe
+        const iframeHtml = `
+            <div class="video-embed">
+                <iframe
+                    src="https://www.youtube.com/embed/${videoId}"
+                    title="YouTube video"
+                    frameborder="0"
+                    allowfullscreen>
+                </iframe>
+            </div>
+        `;
+
+        // Insert iframe at current cursor position
+        const range = quill.getSelection(true);
+
+        quill.clipboard.dangerouslyPasteHTML(
+            range.index,
+            iframeHtml
+        );
     }
 };

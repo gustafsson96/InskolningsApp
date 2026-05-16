@@ -6,18 +6,52 @@
     <!-- Quill editor container -->
     <div id="@editorId" class="quill-editor"></div>
 
-    @if (AllowImages)
-    {
-        <div class="rich-text-image-upload">
+    <div class="rich-text-actions">
+        @if (AllowImages)
+        {
             <label class="image-upload-button">
                 <i class="fa-regular fa-image"></i>
                 Lägg till bild
-
                 <InputFile class="hidden-file-input" OnChange="UploadImage" accept="image/*" />
             </label>
-        </div>
-    }
+
+        }
+
+        <button type="button" class="video-button" @onclick="ToggleVideoPopup">
+            <i class="fa-brands fa-youtube"></i>
+            Lägg till video
+        </button>
+    </div>
 </div>
+
+@if (showVideoPopup)
+{
+    <div class="video-popup-overlay">
+        <div class="video-popup">
+
+            <div class="video-popup-header">
+                <h3>Lägg till YouTube-video</h3>
+
+                <button type="button" class="close-popup-button" @onclick="ToggleVideoPopup">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <input @bind="youtubeUrl" placeholder="Klistra in YouTube-länk" class="youtube-input" />
+
+            <div class="video-popup-actions">
+                <button type="button" class="secondary-button" @onclick="ToggleVideoPopup">
+                    Avbryt
+                </button>
+
+                <button type="button" class="primary-button" @onclick="InsertYoutubeVideo">
+                    Infoga video
+                </button>
+            </div>
+
+        </div>
+    </div>
+}
 
 @code {
     // Current editor value (HTML)
@@ -34,6 +68,12 @@
 
     // Unique id for the Quill instance
     private readonly string editorId = $"editor-{Guid.NewGuid()}";
+
+    // Youtube url
+    private string youtubeUrl = string.Empty;
+    
+    // Controls if the video popup is visible
+    private bool showVideoPopup = false;
 
     // Create Quill editor after component has rendered
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -103,5 +143,31 @@
             editorId,
             imageUrl
         );
+    }
+
+    // Insert YouTube video into editor
+    private async Task InsertYoutubeVideo()
+    {
+        if (string.IsNullOrWhiteSpace(youtubeUrl))
+        {
+            return;
+        }
+
+        await JS.InvokeVoidAsync(
+            "quillEditor.insertYoutube",
+            editorId,
+            youtubeUrl
+        );
+
+        youtubeUrl = string.Empty;
+
+        // Hide popup after insert
+        showVideoPopup = false;
+    }
+
+    // Shows or hides the video popup
+    private void ToggleVideoPopup()
+    {
+        showVideoPopup = !showVideoPopup;
     }
 }
