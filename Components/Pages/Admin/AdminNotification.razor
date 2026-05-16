@@ -1,70 +1,113 @@
 @using Microsoft.EntityFrameworkCore
 @using OnboardingApp.Data
-@using OnboardingApp.Models
 
 @inject ApplicationDbContext Db
 
-<section class="admin-notification-panel">
-    <div class="notification-panel-header">
-        <div>
-            <h2>Notiser</h2>
-        </div>
+@if (unreadCount > 0)
+{
+    <section class="admin-notification-panel">
+        <div class="notification-summary">
+            <div>
+                <h2>Notiser</h2>
+                <p>@unreadCount olästa notiser</p>
+            </div>
 
-        <span class="notification-count">@unreadCount</span>
-    </div>
+            <div class="notification-actions">
 
-    @if (notifications.Count == 0)
-    {
-        <p class="empty-notifications">Inga uppdateringar att rapportera.</p>
-    }
-    else
-    {
-        <div class="notification-list">
-            @foreach (var notification in notifications)
-            {
-                <article class="notification-item @(notification.IsRead ? "read" : "unread")">
-                    <div>
-                        <h3>@notification.Title</h3>
-                        <p>@notification.Message</p>
-                        <small>Förfaller: @notification.DueDate.ToString("yyyy-MM-dd")</small>
-                    </div>
-                    <button class="notification-dismiss" title="Markera som läst" @onclick="() => MarkAsRead(notification)">
-                        <i class="fa-solid fa-xmark"></i>
+                @if (showNotifications)
+                {
+                    <button class="secondary-button danger" @onclick="MarkAllAsRead">
+                        Markera alla som lästa
                     </button>
-                </article>
-            }
+                }
+
+                <button class="primary-button" @onclick="ToggleNotifications">
+                    @(showNotifications ? "Dölj notiser" : "Visa notiser")
+                </button>
+
+            </div>
         </div>
-    }
-</section>
+
+        @if (showNotifications)
+        {
+            <div class="notification-list">
+                @foreach (var notification in notifications)
+                {
+                    <article class="notification-item">
+                        <div>
+                            <h3>@notification.Title</h3>
+                            <p>@notification.Message</p>
+                        </div>
+
+                        <button class="notification-dismiss" title="Markera som läst" @onclick="() => MarkAsRead(notification)">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+}
 
 @code {
-    // Stores the latest notifications shown in panel
+    // Stores unread notifications shown in the panel
     private List<OnboardingApp.Models.AdminNotification> notifications = new();
 
-    // Unread notifications
+    // Controls if the notification list is expanded or hidden
+    private bool showNotifications = false;
+
+    // Number of unread notifications
     private int unreadCount;
 
     protected override async Task OnInitializedAsync()
     {
-        // Load the latest notifications
+        await LoadNotifications();
+    }
+
+    // Loads unread notifications
+    private async Task LoadNotifications()
+    {
         notifications = await Db.AdminNotifications
             .Where(n => !n.IsRead)
             .OrderBy(n => n.DueDate)
-            .Take(5)
             .ToListAsync();
 
-        // Count unread notifications
-        unreadCount = notifications.Count(n => !n.IsRead);
+        unreadCount = notifications.Count;
     }
 
-    // Mark a notification as read when x-button is clicked
+    // Shows or hides the notification list
+    private void ToggleNotifications()
+    {
+        showNotifications = !showNotifications;
+    }
+
+    // Marks one notification as read
     private async Task MarkAsRead(OnboardingApp.Models.AdminNotification notification)
     {
         notification.IsRead = true;
 
         await Db.SaveChangesAsync();
 
-        notifications.Remove(notification);
-        unreadCount = notifications.Count(n => !n.IsRead);
+        await LoadNotifications();
+
+        if (unreadCount == 0)
+        {
+            showNotifications = false;
+        }
+    }
+
+    // Marks all unread notifications as read
+    private async Task MarkAllAsRead()
+    {
+        foreach (var notification in notifications)
+        {
+            notification.IsRead = true;
+        }
+
+        await Db.SaveChangesAsync();
+
+        notifications.Clear();
+        unreadCount = 0;
+        showNotifications = false;
     }
 }
