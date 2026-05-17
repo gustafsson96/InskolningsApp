@@ -10,7 +10,7 @@
 <div class="admin-quiz-page">
     <div class="admin-page-header">
         <div>
-            <h1>Hantera quiz för @module.Title-modulen</h1>
+            <h1>Hantera quiz för @module?.Title-modulen</h1>
         </div>
     </div>
 
@@ -92,7 +92,7 @@
                                 </ul>
                             }
 
-                            @if (question.Options.Count >= 4)
+                            @if (question.Options?.Count >= 4)
                             {
                                 <p class="empty-text">
                                     Max antal svarsalternativ uppnått.
