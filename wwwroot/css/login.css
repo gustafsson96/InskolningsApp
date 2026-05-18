@@ -54,12 +54,14 @@
     margin: 0 0 0.4em 0;
     font-size: 1.5em;
     color: #111827;
+    text-align: center;
 }
 
 .login-card-subtitle {
     margin: 0 0 1.5em 0;
     color: #6b7280;
     font-size: 1.05em;
+    text-align: center;
 }
 
 .login-field {
