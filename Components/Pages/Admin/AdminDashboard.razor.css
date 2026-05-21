@@ -97,8 +97,67 @@
     }
 }
 
+@media (max-width: 900px) {
+    .admin-dashboard h1 {
+        font-size: 2em;
+        line-height: 1.15;
+    }
+
+    .admin-dashboard-intro {
+        font-size: 1em;
+        margin-bottom: 1.5em;
+    }
+
+    .admin-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1em;
+    }
+
+    .admin-stat-card,
+    .admin-action-card {
+        padding: 1.25em;
+        border-radius: 18px;
+    }
+
+    .admin-stat-card h2 {
+        font-size: 2em;
+    }
+
+    .admin-action-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-action-card button {
+        min-height: 44px;
+    }
+}
+
 @media (max-width: 600px) {
     .admin-stats-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .admin-dashboard h1 {
+        font-size: 1.75em;
+    }
+
+    .admin-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-stat-card,
+    .admin-action-card {
+        padding: 1em;
+        border-radius: 16px;
+    }
+
+    .admin-stat-card h2 {
+        font-size: 1.8em;
+    }
+
+    .admin-card-summary {
+        padding: 0.85em;
     }
 }
