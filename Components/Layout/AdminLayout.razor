@@ -2,9 +2,34 @@
 @inherits LayoutComponentBase
 
 <div class="admin-layout">
-    <AdminSidebar />
+    @if (!sidebarOpen)
+    {
+        <button class="mobile-menu-button" @onclick="ToggleSidebar">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    }
+    @if (sidebarOpen)
+    {
+        <div class="sidebar-overlay" @onclick="CloseSidebar"></div>
+    }
+
+    <AdminSidebar IsOpen="sidebarOpen" OnClose="CloseSidebar" />
 
     <main class="admin-content">
         @Body
     </main>
 </div>
+
+@code {
+    private bool sidebarOpen;
+
+    private void ToggleSidebar()
+    {
+        sidebarOpen = !sidebarOpen;
+    }
+
+    private void CloseSidebar()
+    {
+        sidebarOpen = false;
+    }
+}

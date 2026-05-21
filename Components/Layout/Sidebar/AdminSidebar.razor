@@ -2,41 +2,35 @@
 @inject NavigationManager Nav
 
 
-<div class="admin-sidebar">
+<div class="admin-sidebar @(IsOpen ? "open" : "")">
+    <button class="close-sidebar-button" @onclick="OnClose">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
     <div class="admin-sidebar-top">
         <div class="admin-header">
-        <!-- Title -->
+            <!-- Title -->
             <h2>Adminpanel</h2>
             <p>Introduktionshantering</p>
         </div>
 
         <!-- Admin links -->
         <nav class="admin-nav">
-            <NavLink href="/admin"
-                     class="admin-link"
-                     ActiveClass="active"
-                     Match="NavLinkMatch.All">
+            <NavLink href="/admin" class="admin-link" ActiveClass="active" Match="NavLinkMatch.All">
                 <span class="admin-icon">▣</span>
                 <span>Översikt</span>
             </NavLink>
 
-            <NavLink href="/admin/checklista"
-                     class="admin-link"
-                     ActiveClass="active">
+            <NavLink href="/admin/checklista" class="admin-link" ActiveClass="active">
                 <span class="admin-icon">✓</span>
                 <span>Checklista</span>
             </NavLink>
 
-            <NavLink href="/admin/moduler"
-                     class="admin-link"
-                     ActiveClass="active">
+            <NavLink href="/admin/moduler" class="admin-link" ActiveClass="active">
                 <span class="admin-icon">≣</span>
                 <span>Moduler & quiz</span>
             </NavLink>
 
-            <NavLink href="/admin/anvandare"
-                     class="admin-link"
-                     ActiveClass="active">
+            <NavLink href="/admin/anvandare" class="admin-link" ActiveClass="active">
                 <span class="admin-icon">◉</span>
                 <span>Användarhantering</span>
             </NavLink>
@@ -48,16 +42,18 @@
         <button class="admin-btn back-btn" @onclick="GoBack">
             ← Visa användarvy
         </button>
-            <form method="post" action="/logout">
-                <button type="submit" class="admin-btn logout-btn">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                    Logga ut
-                </button>
-            </form>
+        <form method="post" action="/logout">
+            <button type="submit" class="admin-btn logout-btn">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                Logga ut
+            </button>
+        </form>
     </div>
 </div>
 
 @code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
     private void GoBack()
     {
         Nav.NavigateTo("/dashboard");
