@@ -52,6 +52,7 @@
     border-radius: 20px;
     padding: 1.5em;
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+    margin-bottom: 3em;
 }
 
 .quiz-card-top {
@@ -259,4 +260,118 @@
 .option-row.wrong {
     border-color: #ef4444;
     background: #fef2f2;
+}
+
+@media (max-width: 900px) {
+    .quiz-page {
+        max-width: 100%;
+        padding: 1em;
+    }
+
+    .quiz-header h1 {
+        font-size: 1.7em;
+        line-height: 1.2;
+    }
+
+    .quiz-description {
+        font-size: 0.98em;
+    }
+
+    .quiz-card {
+        padding: 1.15em;
+        border-radius: 16px;
+    }
+
+    .quiz-card-top {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1em;
+    }
+
+    .quiz-header-badges {
+        flex-wrap: wrap;
+    }
+
+    .question-card {
+        padding: 1em;
+    }
+
+    .option-row {
+        align-items: flex-start;
+        padding: 1em;
+    }
+
+    .option-row input[type="radio"] {
+        width: 22px;
+        height: 22px;
+        margin-top: 0.15em;
+        accent-color: #2563eb;
+        flex-shrink: 0;
+    }
+
+    .quiz-actions {
+        justify-content: stretch;
+    }
+
+    .submit-button {
+        width: 100%;
+        padding: 1em;
+    }
+}
+
+@media (max-width: 520px) {
+    .quiz-page {
+        padding: 0.5em 0;
+    }
+
+    .back-button {
+        margin-left: 0.75em;
+    }
+
+    .quiz-header {
+        padding-inline: 0.75em;
+    }
+
+    .quiz-card {
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        padding: 1em 0.85em;
+    }
+
+    .quiz-actions {
+        margin-bottom: 1em;
+    }
+
+    .question-top {
+        gap: 0.7em;
+    }
+
+    .question-number {
+        min-width: 2.2em;
+        height: 2.2em;
+    }
+
+    .question-top h3 {
+        font-size: 1em;
+    }
+
+    .option-row {
+        border-radius: 14px;
+        gap: 0.85em;
+    }
+
+    .option-row span {
+        font-size: 0.98em;
+    }
+
+    .completed-badge,
+    .quiz-status-badge {
+        white-space: normal;
+    }
+
+    .show-answers-button,
+    .retry-button {
+        width: 100%;
+    }
 }
