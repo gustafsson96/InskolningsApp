@@ -118,27 +118,26 @@
 
                             <div class="user-card-progress">
                                 <div class="progress-header">
-                                    <span class="status-badge @GetUserStatusClass(user.Id)">
-                                        @GetUserStatus(user.Id)
+                                    <span class="status-badge @GetChecklistStatusClass(user.Id)">
+                                        @GetChecklistStatus(user.Id)
                                     </span>
 
                                     <span class="progress-count">
-                                        @GetCompletedModuleCount(user.Id) av @modules.Count moduler
+                                        Checklista: @GetCompletedChecklistCount(user.Id)/@totalChecklistItems
                                     </span>
                                 </div>
 
                                 <div class="progress-track">
-                                    <div class="progress-bar" style="width: @GetModuleProgressPercent(user.Id)%"></div>
+                                    <div class="progress-bar" style="width: @GetChecklistProgressPercent(user.Id)%">
+                                    </div>
                                 </div>
                             </div>
-
                             <div class="user-actions">
                                 <button class="secondary-button" @onclick="() => ToggleManagePanel(user.Id)">
                                     <i class="fa-solid fa-ellipsis"></i>
                                 </button>
                             </div>
                         </div>
-
                         @if (activeUserPanelId == user.Id)
                         {
                             <div class="user-manage-panel">
@@ -280,7 +279,9 @@
     private List<ModuleModel> modules = new();
     private List<UserModuleProgress> moduleProgresses = new();
 
-    
+    private List<UserChecklistItemStatus> checklistProgresses = new();
+    private int totalChecklistItems;
+
     
     // Form model when editing users
     private class UserFormModel
@@ -318,6 +319,7 @@
         await LoadUsers();
     }
 
+    // Update feedback message
     private void SetMessage(string newMessage)
     {
         message = newMessage;
@@ -351,6 +353,7 @@
         editingUserId = null;
     }
 
+    // Check if a specific module is completed
     private bool IsModuleCompleted(string userId, int moduleId)
     {
         return moduleProgresses.Any(p =>
@@ -359,38 +362,39 @@
             p.IsCompleted);
     }
 
-    // Returns number of completed modules for a user
-    private int GetCompletedModuleCount(string userId)
+    // Returns number of completed checklist items
+    private int GetCompletedChecklistCount(string userId)
     {
-        return moduleProgresses.Count(p =>
-            p.UserId == userId &&
-            p.IsCompleted);
+        return checklistProgresses.Count(x =>
+            x.UserId == userId &&
+            x.Status == ChecklistStatus.Completed);
     }
 
-    // Returns progress percentage for a user
-    private int GetModuleProgressPercent(string userId)
+    // Returns checklist progress percentage
+    private int GetChecklistProgressPercent(string userId)
     {
-        if (modules.Count == 0)
+        if (totalChecklistItems == 0)
         {
             return 0;
         }
 
         return (int)Math.Round(
-            (double)GetCompletedModuleCount(userId) / modules.Count * 100
+            (double)GetCompletedChecklistCount(userId) /
+            totalChecklistItems * 100
         );
     }
 
-    // Returns onboarding status class
-    private string GetUserStatusClass(string userId)
+    // Return checklist status style class
+    private string GetChecklistStatusClass(string userId)
     {
-        var completed = GetCompletedModuleCount(userId);
+        var completed = GetCompletedChecklistCount(userId);
 
         if (completed == 0)
         {
             return "not-started";
         }
 
-        if (completed == modules.Count)
+        if (completed == totalChecklistItems)
         {
             return "completed";
         }
@@ -398,17 +402,17 @@
         return "in-progress";
     }
 
-    // Returns onboarding status label
-    private string GetUserStatus(string userId)
+    // Return checklist status label
+    private string GetChecklistStatus(string userId)
     {
-        var completed = GetCompletedModuleCount(userId);
+        var completed = GetCompletedChecklistCount(userId);
 
         if (completed == 0)
         {
             return "Ej påbörjad";
         }
 
-        if (completed == modules.Count)
+        if (completed == totalChecklistItems)
         {
             return "Avklarad";
         }
@@ -441,10 +445,15 @@
         }
 
         modules = await Db.Modules
-            .OrderBy(m => m.OrderIndex)
-            .ToListAsync();
+        .OrderBy(m => m.OrderIndex)
+        .ToListAsync();
 
         moduleProgresses = await Db.UserModuleProgresses
+            .ToListAsync();
+
+        totalChecklistItems = await Db.ChecklistItems.CountAsync();
+
+        checklistProgresses = await Db.UserChecklistItemStatus
             .ToListAsync();
     }
 

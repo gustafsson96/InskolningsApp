@@ -181,6 +181,13 @@
     background: linear-gradient(90deg, #2563eb, #7c3aed);
 }
 
+
+.user-card-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6em;
+}
+
 .status-badge {
     display: inline-flex;
     align-items: center;
