@@ -170,3 +170,72 @@
     background-color: #fef2f2;
     color: #b91c1c;
 }
+
+@media (max-width: 900px) {
+    .profile-page {
+        padding: 1.5em;
+        min-height: auto;
+    }
+
+    .profile-page h1 {
+        font-size: 1.7em;
+        line-height: 1.2;
+    }
+
+    .profile-card {
+        max-width: 100%;
+        padding: 1.4em;
+        border-radius: 18px;
+    }
+
+    .info-card {
+        padding: 1em;
+    }
+}
+
+@media (max-width: 520px) {
+    .profile-page {
+        padding: 1em 0;
+    }
+
+    .back-button,
+    .profile-page h1 {
+        margin-left: 0.85em;
+        margin-right: 0.85em;
+    }
+
+    .profile-card {
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        padding: 1.1em 0.85em;
+    }
+
+    .info-card {
+        align-items: flex-start;
+        gap: 0.8em;
+    }
+
+    .info-icon {
+        width: 24px;
+        margin-top: 0.15em;
+    }
+
+    .info-value {
+        font-size: 1em;
+        word-break: break-word;
+    }
+
+    .password-card-header {
+        align-items: center;
+    }
+
+    .form-group input {
+        font-size: 1em;
+        padding: 0.95em 1em;
+    }
+
+    .password-button {
+        padding: 1em;
+    }
+}
