@@ -2,14 +2,20 @@
 @inherits LayoutComponentBase
 
 <div class="page">
-        <EmployeeSidebar />
 
+    <button class="mobile-menu-button @(sidebarOpen ? "hidden" : "")" @onclick="ToggleSidebar">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    @if (sidebarOpen)
+    {
+        <div class="sidebar-overlay" @onclick="CloseSidebar"></div>
+    }
+
+    <EmployeeSidebar IsOpen="sidebarOpen" OnClose="CloseSidebar" />
+   
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
+        <article class="content">
             @Body
         </article>
     </main>
@@ -20,3 +26,17 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    private bool sidebarOpen;
+
+    private void ToggleSidebar()
+    {
+        sidebarOpen = !sidebarOpen;
+    }
+
+    private void CloseSidebar()
+    {
+        sidebarOpen = false;
+    }
+}

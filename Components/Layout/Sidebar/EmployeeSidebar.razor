@@ -10,7 +10,10 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject ApplicationDbContext Db
 
-<div class="sidebar">
+<div class="sidebar @(IsOpen ? "open" : "")">
+    <button class="close-sidebar-button" @onclick="OnClose">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
     <div class="sidebar-header">
         <!-- Title and progress bar -->
         <h2 class="sidebar-title">Introduktion</h2>
@@ -22,8 +25,8 @@
         <p class="progress-text">@completedModules av @totalModules moduler slutförda</p>
     </div>
 
-        <SidebarSearch Modules="@modules" />
-        <div class="sidebar-main">
+    <SidebarSearch Modules="@modules" />
+    <div class="sidebar-main">
         <!-- Checklist section -->
         <nav class="sidebar-nav">
             <NavLink href="/dashboard" class="nav-link" ActiveClass="active">
@@ -40,15 +43,13 @@
         </nav>
         <!-- Link to modules -->
         <div class="sidebar-modules">
-        <p class="section-title">Moduler</p>
+            <p class="section-title">Moduler</p>
             @foreach (var module in modules)
-                {
-                <NavLink href="@($"/modul/{module.ModuleId}")"
-                        class="module-link"
-                        ActiveClass="active">
+            {
+                <NavLink href="@($"/modul/{module.ModuleId}")" class="module-link" ActiveClass="active">
                     @module.Title
                 </NavLink>
-                }
+            }
         </div>
 
         <!-- Link to admin dashboard if role = admin -->
@@ -60,31 +61,31 @@
     </div>
 
     <!-- Profile section -->
-<div class="sidebar-profile">
-    @if (showProfileMenu)
-    {
-        <div class="profile-menu">
-            <NavLink href="/profil" class="profile-menu-item">
-                <span>Profil & inställningar</span>
-            </NavLink>
+    <div class="sidebar-profile">
+        @if (showProfileMenu)
+        {
+            <div class="profile-menu">
+                <NavLink href="/profil" class="profile-menu-item">
+                    <span>Profil & inställningar</span>
+                </NavLink>
 
-            <form method="post" action="/logout">
-                <button type="submit" class="profile-menu-item logout-button">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                    Logga ut
-                </button>
-            </form>
-        </div>
-    }
+                <form method="post" action="/logout">
+                    <button type="submit" class="profile-menu-item logout-button">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        Logga ut
+                    </button>
+                </form>
+            </div>
+        }
 
-    <button type="button" class="sidebar-user" @onclick="ToggleProfileMenu">
-        <div class="user-avatar">@initials</div>
-        <div class="user-info">
-            <p class="user-name">@(fullName ?? "Användare")</p>
-            <p class="user-action">Visa alternativ</p>
-        </div>
-    </button>
-</div>
+        <button type="button" class="sidebar-user" @onclick="ToggleProfileMenu">
+            <div class="user-avatar">@initials</div>
+            <div class="user-info">
+                <p class="user-name">@(fullName ?? "Användare")</p>
+                <p class="user-action">Visa alternativ</p>
+            </div>
+        </button>
+    </div>
 </div>
 
 @code {
@@ -98,6 +99,8 @@
     private int totalChecklistItems;
     private int completedChecklistItems;
     private bool showProfileMenu = false;
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -138,7 +141,8 @@
 
         totalChecklistItems = await Db.ChecklistItems.CountAsync();
 
-        completedChecklistItems = await Db.UserChecklistItemStatus.CountAsync(x => x.UserId == userId && x.Status == ChecklistStatus.Completed);
+        completedChecklistItems = await Db.UserChecklistItemStatus.CountAsync(x => x.UserId == userId && x.Status ==
+ChecklistStatus.Completed);
     }
 
     private void ToggleProfileMenu()
