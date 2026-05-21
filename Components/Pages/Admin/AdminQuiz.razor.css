@@ -127,12 +127,117 @@ input[type="checkbox"] {
     margin-right: 0.5em;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 900px) {
     .admin-page-header h1 {
         font-size: 2em;
+        line-height: 1.15;
+    }
+
+    .admin-page-header p {
+        font-size: 1em;
     }
 
     .quiz-module-card {
         padding: 1.25em;
+        border-radius: 18px;
+    }
+
+    .quiz-question-card {
+        padding: 1.1em;
+    }
+
+    button {
+        min-height: 44px;
+    }
+
+    textarea,
+    input {
+        font-size: 1em;
+    }
+}
+
+@media (max-width: 700px) {
+    .admin-page-header {
+        margin-bottom: 1.5em;
+    }
+
+    .quiz-module-card h2 {
+        line-height: 1.2;
+        word-break: break-word;
+    }
+
+    .quiz-question-card p {
+        line-height: 1.5;
+    }
+
+    .quiz-question-card ul {
+        padding-left: 1em;
+    }
+
+    .quiz-question-card li {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.6em;
+    }
+
+    .quiz-question-card li button {
+        margin-left: 0;
+        margin-top: 0;
+    }
+
+    .form-small-space {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75em;
+    }
+
+    .form-small-space button {
+        width: fit-content;
+    }
+}
+
+@media (max-width: 520px) {
+    .admin-quiz-page {
+        padding-bottom: 2em;
+    }
+
+    .admin-page-header h1 {
+        font-size: 1.75em;
+    }
+
+    .quiz-module-card {
+        border-radius: 16px;
+        padding: 1em;
+    }
+
+    .quiz-question-card {
+        border-radius: 14px;
+        padding: 1em;
+    }
+
+    button {
+        width: 100%;
+        margin-left: 0;
+        justify-content: center;
+    }
+
+    .quiz-question-card button {
+        width: auto;
+    }
+
+    .form-small-space button {
+        width: 100%;
+    }
+
+    .quiz-question-card li {
+        gap: 0.75em;
+    }
+
+    input[type="checkbox"] {
+        width: 22px;
+        height: 22px;
+        margin-right: 0.65em;
+        accent-color: #2563eb;
     }
 }
