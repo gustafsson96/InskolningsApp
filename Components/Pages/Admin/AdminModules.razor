@@ -391,6 +391,8 @@
     {
         var module = await Db.Modules
             .Include(m => m.Sections)
+            .Include(m => m.QuizQuestions)
+                .ThenInclude(q => q.Options)
             .FirstOrDefaultAsync(m => m.ModuleId == moduleId);
 
         if (module is null)
@@ -399,15 +401,48 @@
             return;
         }
 
+        var questionIds = module.QuizQuestions
+            .Select(q => q.QuizQuestionId)
+            .ToList();
+
+        var optionIds = module.QuizQuestions
+            .SelectMany(q => q.Options)
+            .Select(o => o.QuizOptionId)
+            .ToList();
+
+        var attempts = await Db.QuizAttempts
+            .Where(a => a.ModuleId == moduleId)
+            .ToListAsync();
+
+        var attemptIds = attempts
+            .Select(a => a.QuizAttemptId)
+            .ToList();
+
+        var answers = await Db.QuizAnswers
+            .Where(a =>
+                attemptIds.Contains(a.QuizAttemptId) ||
+                questionIds.Contains(a.QuizQuestionId) ||
+                optionIds.Contains(a.SelectedOptionId))
+            .ToListAsync();
+
+        Db.QuizAnswers.RemoveRange(answers);
+        Db.QuizAttempts.RemoveRange(attempts);
+
         if (module.Sections.Any())
         {
             Db.ModuleSections.RemoveRange(module.Sections);
         }
 
+        if (module.QuizQuestions.Any())
+        {
+            Db.QuizQuestions.RemoveRange(module.QuizQuestions);
+        }
+
         Db.Modules.Remove(module);
+
         await Db.SaveChangesAsync();
 
-        moduleListMessage = "Modulen och dess sektioner togs bort.";
+        moduleListMessage = "Modulen, dess sektioner och quizdata togs bort.";
         await LoadModules();
     }
 

@@ -1,6 +1,5 @@
 @page "/dashboard"
 @using System.Security.Claims
-@using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.EntityFrameworkCore
@@ -9,9 +8,8 @@
 @using ModuleModel = OnboardingApp.Models.Module
 @attribute [Authorize]
 
-@inject ApplicationDbContext Db
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject UserManager<ApplicationUser> UserManager
 
 @if (isLoading)
 {
@@ -23,18 +21,12 @@ else
         Välkommen@(string.IsNullOrWhiteSpace(firstName) ? "" : $", {firstName}")!
     </h1>
     @* Overview cards for modules *@
-    <ModuleOverview
-        TotalModules="@totalModules"
-        CompletedModules="@completedModules"
-        RemainingModules="@remainingModules" />
+    <ModuleOverview TotalModules="@totalModules" CompletedModules="@completedModules"
+                    RemainingModules="@remainingModules" />
     @* Checklist status overview *@
-    <ProgressBar 
-        Total="@totalChecklistItems" 
-        Completed="@completedChecklistItems" />
+    <ProgressBar Total="@totalChecklistItems" Completed="@completedChecklistItems" />
     @* List of module cards *@
-    <ModuleCards
-        Modules="@modules"
-        UserProgresses="@moduleProgresses" />
+    <ModuleCards Modules="@modules" UserProgresses="@moduleProgresses" />
 }
 
 @code {
@@ -69,10 +61,6 @@ else
             return;
         }
 
-        // Fetch full user from Identity (ApplicationUser)
-        var appUser = await UserManager.GetUserAsync(user);
-        firstName = appUser?.FirstName;
-
         // Get user id
         string? userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -82,29 +70,36 @@ else
             return;
         }
 
+        await using var Db = await DbFactory.CreateDbContextAsync();
+
+        // Fetch full user from database
+        var appUser = await Db.Users
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        firstName = appUser?.FirstName;
+
         // Count all modules
         totalModules = await Db.Modules.CountAsync();
 
-        // Count completed modules (user specific)
+        // Count completed modules
         completedModules = await Db.UserModuleProgresses
             .CountAsync(x => x.UserId == userId && x.IsCompleted);
 
-        // Calculate remaining modules
         remainingModules = totalModules - completedModules;
 
-        // Count all checklist items
+        // Count checklist items
         totalChecklistItems = await Db.ChecklistItems.CountAsync();
 
-        // Count checklist items marked as completed by user 
+        // Count completed checklist items
         completedChecklistItems = await Db.UserChecklistItemStatus
-        .CountAsync(x => x.UserId == userId && x.Status == ChecklistStatus.Completed);
+            .CountAsync(x => x.UserId == userId && x.Status == ChecklistStatus.Completed);
 
-        // Load all modules 
+        // Load modules
         modules = await Db.Modules
             .OrderBy(m => m.OrderIndex)
             .ToListAsync();
 
-        // Load user's progress for modules 
+        // Load user's module progress
         moduleProgresses = await Db.UserModuleProgresses
             .Where(x => x.UserId == userId)
             .ToListAsync();

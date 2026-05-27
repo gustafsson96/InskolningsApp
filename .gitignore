@@ -491,3 +491,6 @@ $RECYCLE.BIN/
 
 # Section uploads
 wwwroot/uploads/sections
+appsettings.json
+appsettings.Development.json
+.vscode/
