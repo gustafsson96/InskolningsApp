@@ -491,6 +491,12 @@ $RECYCLE.BIN/
 
 # Section uploads
 wwwroot/uploads/sections
+
+# Extras after deployment
 appsettings.json
 appsettings.Development.json
 .vscode/
+*.db
+*.sqlite
+*.sqlite3
+*.lscache
