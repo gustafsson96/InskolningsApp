@@ -8,7 +8,7 @@
 @using ModuleModel = OnboardingApp.Models.Module
 @attribute [Authorize]
 
-@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject ApplicationDbContext Db
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 @if (isLoading)
@@ -69,8 +69,6 @@ else
             isLoading = false;
             return;
         }
-
-        await using var Db = await DbFactory.CreateDbContextAsync();
 
         // Fetch full user from database
         var appUser = await Db.Users

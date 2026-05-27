@@ -17,19 +17,22 @@ builder
     });
 builder.Services.AddRazorPages();
 
-// DbContext with SQLite (for dev)
-//builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
-// );
+// DbContext with SQLite
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("SqliteConnection"))
+);
 
+/*
 // DbContext with SQL Server
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
+
 builder.Services.AddScoped<ApplicationDbContext>(sp =>
     sp.GetRequiredService<IDbContextFactory<ApplicationDbContext>>().CreateDbContext()
 );
+*/
 
 // Identity
 builder
