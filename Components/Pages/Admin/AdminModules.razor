@@ -386,63 +386,67 @@
         moduleTitlePendingDelete = null;
     }
 
-    // Delete a module and its sections
+    // Delete a module and its related data
     private async Task DeleteModule(int moduleId)
     {
-        var module = await Db.Modules
-            .Include(m => m.Sections)
-            .Include(m => m.QuizQuestions)
-                .ThenInclude(q => q.Options)
-            .FirstOrDefaultAsync(m => m.ModuleId == moduleId);
+        var moduleExists = await Db.Modules
+            .AnyAsync(m => m.ModuleId == moduleId);
 
-        if (module is null)
+        if (!moduleExists)
         {
             moduleListMessage = "Modulen kunde inte hittas.";
             return;
         }
 
-        var questionIds = module.QuizQuestions
+        var questionIds = await Db.QuizQuestions
+            .Where(q => q.ModuleId == moduleId)
             .Select(q => q.QuizQuestionId)
-            .ToList();
-
-        var optionIds = module.QuizQuestions
-            .SelectMany(q => q.Options)
-            .Select(o => o.QuizOptionId)
-            .ToList();
-
-        var attempts = await Db.QuizAttempts
-            .Where(a => a.ModuleId == moduleId)
             .ToListAsync();
 
-        var attemptIds = attempts
-            .Select(a => a.QuizAttemptId)
-            .ToList();
+        var optionIds = await Db.QuizOptions
+            .Where(o => questionIds.Contains(o.QuizQuestionId))
+            .Select(o => o.QuizOptionId)
+            .ToListAsync();
 
-        var answers = await Db.QuizAnswers
+        // Delete quiz answers first to avoid foreign key conflicts
+        await Db.QuizAnswers
             .Where(a =>
-                attemptIds.Contains(a.QuizAttemptId) ||
                 questionIds.Contains(a.QuizQuestionId) ||
                 optionIds.Contains(a.SelectedOptionId))
-            .ToListAsync();
+            .ExecuteDeleteAsync();
 
-        Db.QuizAnswers.RemoveRange(answers);
-        Db.QuizAttempts.RemoveRange(attempts);
+        // Delete quiz attempts
+        await Db.QuizAttempts
+            .Where(a => a.ModuleId == moduleId)
+            .ExecuteDeleteAsync();
 
-        if (module.Sections.Any())
-        {
-            Db.ModuleSections.RemoveRange(module.Sections);
-        }
+        // Delete quiz options
+        await Db.QuizOptions
+            .Where(o => optionIds.Contains(o.QuizOptionId))
+            .ExecuteDeleteAsync();
 
-        if (module.QuizQuestions.Any())
-        {
-            Db.QuizQuestions.RemoveRange(module.QuizQuestions);
-        }
+        // Delete quiz questions
+        await Db.QuizQuestions
+            .Where(q => q.ModuleId == moduleId)
+            .ExecuteDeleteAsync();
 
-        Db.Modules.Remove(module);
+        // Delete module sections
+        await Db.ModuleSections
+            .Where(s => s.ModuleId == moduleId)
+            .ExecuteDeleteAsync();
 
-        await Db.SaveChangesAsync();
+        // Delete user module progress
+        await Db.UserModuleProgresses
+            .Where(p => p.ModuleId == moduleId)
+            .ExecuteDeleteAsync();
 
-        moduleListMessage = "Modulen, dess sektioner och quizdata togs bort.";
+        // Delete the module itself
+        await Db.Modules
+            .Where(m => m.ModuleId == moduleId)
+            .ExecuteDeleteAsync();
+
+        moduleListMessage = "Modulen och all kopplad data togs bort.";
+
         await LoadModules();
     }
 
