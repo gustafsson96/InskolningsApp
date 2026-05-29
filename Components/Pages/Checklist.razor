@@ -26,14 +26,21 @@ else
     @* Checklist progress bar *@
     <ProgressBar Total="@TotalChecklistItems" Completed="@CompletedChecklistItems" />
     @* Clickable category cards with individual progress bars *@
-    <div class="category-progress-container">
-        @foreach (var category in categories)
-        {
-            <CategoryProgressCard Category="@category" Total="@GetTotalForCategory(category)"
-                                  Completed="@GetCompletedForCategory(category)" IsActive="@(selectedCategory == category)"
-                                  OnCategoryClick="SetCategory" Color="@GetCategoryColor(category)" />
-        }
-    </div>
+    <button type="button" class="progress-toggle-btn" @onclick="ToggleCategoryProgress">
+        @(showCategoryProgress ? "Dölj progress per kategori" : "Visa progress per kategori")
+    </button>
+
+    @if (showCategoryProgress)
+    {
+        <div class="category-progress-container">
+            @foreach (var category in categories)
+            {
+                <CategoryProgressCard Category="@category" Total="@GetTotalForCategory(category)"
+                                      Completed="@GetCompletedForCategory(category)" IsActive="@(selectedCategory == category)"
+                                      OnCategoryClick="SetCategory" Color="@GetCategoryColor(category)" />
+            }
+        </div>
+    }
 
     @* Filter buttons based on categories *@
     <div class="filter-buttons">
@@ -149,7 +156,7 @@ else
 
     // Store the current user's saved status for checklist items
     private List<UserChecklistItemStatus> userStatuses = new();
-
+    private bool showCategoryProgress = false;
     // Stores the current user's saved notes for checklist items
     private List<UserNote> userNotes = new();
 
@@ -262,6 +269,12 @@ else
 
         UpdateSortedChecklistItems();
         isLoading = false;
+    }
+
+    // Toggle progress bars per category
+    private void ToggleCategoryProgress()
+    {
+        showCategoryProgress = !showCategoryProgress;
     }
 
     // Updates the currently selected category filter

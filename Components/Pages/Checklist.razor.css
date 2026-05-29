@@ -57,6 +57,29 @@
     color: #6b7280;
 }
 
+.progress-toggle-btn {
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
+    padding: 0.75em 1em;
+    border-radius: 12px;
+    font-size: 0.9em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    margin-bottom: 1em;
+}
+
+.progress-toggle-btn:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+    transform: translateY(-1px);
+}
+
+.progress-toggle-btn:active {
+    transform: translateY(0);
+}
+
 .filter-buttons {
     display: flex;
     flex-wrap: wrap;
