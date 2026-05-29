@@ -108,3 +108,32 @@
     justify-content: flex-end;
     gap: 0.75em;
 }
+
+.primary-button,
+.secondary-button {
+    border: none;
+    border-radius: 10px;
+    padding: 0.75em 1em;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.primary-button {
+    background: #111827;
+    color: white;
+}
+
+.primary-button:hover {
+    background: #1f2937;
+}
+
+.secondary-button {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.secondary-button:hover {
+    background: #d1d5db;
+}

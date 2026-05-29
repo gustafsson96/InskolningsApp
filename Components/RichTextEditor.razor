@@ -40,13 +40,14 @@
             <input @bind="youtubeUrl" placeholder="Klistra in YouTube-länk" class="youtube-input" />
 
             <div class="video-popup-actions">
+                <button type="button" class="primary-button" @onclick="InsertYoutubeVideo">
+                    Infoga video
+                </button>
                 <button type="button" class="secondary-button" @onclick="ToggleVideoPopup">
                     Avbryt
                 </button>
 
-                <button type="button" class="primary-button" @onclick="InsertYoutubeVideo">
-                    Infoga video
-                </button>
+
             </div>
 
         </div>
@@ -71,7 +72,7 @@
 
     // Youtube url
     private string youtubeUrl = string.Empty;
-    
+
     // Controls if the video popup is visible
     private bool showVideoPopup = false;
 
