@@ -79,8 +79,8 @@
 .status-pill {
     border: none;
     border-radius: 999px;
-    padding: 0.35em 0.8em;
-    font-size: 0.85em;
+    padding: 0.20em 0.8em;
+    font-size: 0.80em;
     font-weight: 600;
 }
 
@@ -184,6 +184,10 @@
 
 .checklist-card.in-progress {
     background-color: #faf8f0;
+}
+
+.checklist-card.completed {
+    background-color: #f4faf7;
 }
 
 /* Styling for notes */
