@@ -125,10 +125,16 @@ else
                                 <span>Personliga anteckningar:</span>
                             </div>
                             <textarea id="note-@item.ChecklistItemId" class="note-textarea" placeholder="Skriv dina anteckningar här..."
-                                      @bind="BindNote[item.ChecklistItemId]" @bind:event="oninput"
-                                      @onblur="() => SaveNote(item.ChecklistItemId)">
+                                      @bind="BindNote[item.ChecklistItemId]">
                         </textarea>
-                            <p class="note-helper-text">Dina anteckningar sparas automatiskt</p>
+                            <div class="note-actions">
+                                <button class="primary-button" @onclick="() => SaveNote(item.ChecklistItemId)">
+                                    Spara
+                                </button>
+                                <button class="secondary-button" @onclick="() => CancelNote(item.ChecklistItemId)">
+                                    Avbryt
+                                </button>
+                            </div>
                         </div>
                     }
                 </div>
@@ -170,8 +176,6 @@ else
 
     // Store checklist item id for what note panel is currently open (null means that no panel is open)
     private int? openNoteForChecklistItemId = null;
-
-
 
     // Open the note panel for a selected item or close if it is open
     private void ToggleNote(int checklistItemId)
@@ -482,6 +486,14 @@ else
         }
 
         await Db.SaveChangesAsync();
+        openNoteForChecklistItemId = null;
+    }
+
+    // Close note form
+    private void CancelNote(int checklistItemId)
+    {
+        BindNote[checklistItemId] = GetNote(checklistItemId);
+        openNoteForChecklistItemId = null;
     }
 
     // Color mapping for categories

@@ -137,6 +137,79 @@
 }
 
 /* Styling for notes */
+.note-panel {
+    margin-top: 1.2em;
+    padding: 1em;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+}
+
+.note-divider {
+    display: none;
+}
+
+.note-heading {
+    margin-bottom: 0.6em;
+    font-size: 0.95em;
+    font-weight: 600;
+    color: #111827;
+}
+
+.note-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 0.9em 1em;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    background: white;
+    color: #111827;
+    font-family: inherit;
+    font-size: 0.95em;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+.note-textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.note-actions {
+    display: flex;
+    gap: 0.6em;
+    margin-top: 0.8em;
+}
+
+.note-actions .primary-button,
+.note-actions .secondary-button {
+    border: none;
+    border-radius: 10px;
+    padding: 0.65em 1em;
+    font-size: 0.9em;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.note-actions .primary-button {
+    background: #111827;
+    color: white;
+}
+
+.note-actions .primary-button:hover {
+    background: #1f2937;
+}
+
+.note-actions .secondary-button {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.note-actions .secondary-button:hover {
+    background: #d1d5db;
+}
+
 .note-icon-btn {
     width: 40px;
     height: 40px;
