@@ -30,6 +30,17 @@
     margin: 0 0 0.35em 0;
 }
 
+.title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+    flex-wrap: wrap;
+}
+
+.title-row h4 {
+    margin: 0;
+}
+
 .checklist-card-title-area .category {
     display: inline-block;
 }
@@ -55,6 +66,38 @@
     margin-top: 0.9em;
     font-size: 0.9em;
     color: #6b7280;
+}
+
+.status-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-top: 1em;
+    flex-wrap: wrap;
+}
+
+.status-pill {
+    border: none;
+    border-radius: 999px;
+    padding: 0.35em 0.8em;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.status-pill.clickable {
+    cursor: pointer;
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.status-pill.clickable:hover {
+    background: #e5e7eb;
+}
+
+.status-pill.completed {
+    background: #dcfce7;
+    color: #166534;
 }
 
 .progress-toggle-btn {
@@ -137,22 +180,6 @@
     display: flex;
     align-items: center;
     gap: 0.5em;
-}
-
-.start-btn {
-    border: none;
-    background: transparent;
-    color: #6b7280;
-    font-size: 0.8em;
-    font-weight: 500;
-    padding: 0.4em 0.65em;
-    border-radius: 0.5em;
-    cursor: pointer;
-}
-
-.start-btn:hover {
-    background-color: #f3f4f6;
-    color: #111827;
 }
 
 .checklist-card.in-progress {
@@ -312,12 +339,6 @@
         margin-top: 0.5em;
     }
 
-    .start-btn {
-        background-color: #f3f4f6;
-        padding: 0.65em 0.85em;
-        font-size: 0.85em;
-    }
-
     .note-icon-btn {
         width: 42px;
         height: 42px;
@@ -347,7 +368,6 @@
         align-items: stretch;
     }
 
-    .start-btn,
     .note-icon-btn {
         width: 100%;
     }

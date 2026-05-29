@@ -81,21 +81,19 @@ else
                                @onchange="(e) => HandleCheckboxChanged(item.ChecklistItemId, e)" />
 
                         <div class="checklist-card-title-area">
-                            <h4>@item.Title</h4>
+                            <div class="title-row">
+                                <h4>@item.Title</h4>
+
+                                @if (!string.IsNullOrWhiteSpace(item.Category))
+                                {
+                                    <span class="category" style="background-color:@GetCategoryColor(item.Category); color:white;">
+                                        @item.Category
+                                    </span>
+                                }
+                            </div>
                         </div>
 
                         <div class="checklist-card-actions">
-                            @* Show start toggle button if item is not completed *@
-                            @if (GetStatus(item.ChecklistItemId) != ChecklistStatus.Completed)
-                            {
-                                <button type="button" class="start-btn" @onclick='() => ToggleStarted(item.ChecklistItemId)'
-                                        aria-label="Toggle start status">
-
-                                    @(GetStatus(item.ChecklistItemId) == ChecklistStatus.InProgress
-                                        ? "Markera som ej påbörjad"
-                                        : "Markera som påbörjad")
-                                </button>
-                            }
                             @* Button with icon to toggle note panel for a checklist item *@
                             <button type="button" class="note-icon-btn @(IsNoteOpen(item.ChecklistItemId) ? "active" : "")"
                                     @onclick:stopPropagation @onclick='() => ToggleNote(item.ChecklistItemId)'
@@ -112,15 +110,28 @@ else
                     }
 
                     @* Current status (controlled by user) *@
-                    <small class="status-text">
-                        @if (!string.IsNullOrWhiteSpace(item.Category))
+                    <div class="status-row">
+                        <span>
+                            Status:
+                        </span>
+
+                        @if (GetStatus(item.ChecklistItemId) == ChecklistStatus.Completed)
                         {
-                            <small class="category" style="background-color:@GetCategoryColor(item.Category); color:white;">
-                                @item.Category
-                            </small>
+                            <span class="status-pill completed">
+                                Klar
+                            </span>
                         }
-                        Status: @GetStatusLabel(item.ChecklistItemId)
-                    </small>
+                        else
+                        {
+                            <button type="button" class="status-pill clickable" @onclick="() => ToggleStarted(item.ChecklistItemId)">
+
+                                @(GetStatus(item.ChecklistItemId) == ChecklistStatus.InProgress
+                                    ? "Pågår"
+                                    : "Inte påbörjad")
+                            </button>
+                        }
+
+                    </div>
 
                     @* Render note panel when opened *@
                     @if (IsNoteOpen(item.ChecklistItemId))
