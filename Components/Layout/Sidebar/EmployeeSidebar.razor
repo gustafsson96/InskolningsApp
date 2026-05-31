@@ -65,7 +65,7 @@
         @if (showProfileMenu)
         {
             <div class="profile-menu">
-                <NavLink href="/profil" class="profile-menu-item">
+                <NavLink href="/profil" class="profile-menu-item" @onclick="CloseProfileMenu">
                     <span>Profil & inställningar</span>
                 </NavLink>
 
@@ -82,7 +82,7 @@
             <div class="user-avatar">@initials</div>
             <div class="user-info">
                 <p class="user-name">@(fullName ?? "Användare")</p>
-                <p class="user-action">Visa alternativ</p>
+                @(showProfileMenu ? "Dölj alternativ" : "Visa alternativ")
             </div>
         </button>
     </div>
@@ -145,8 +145,15 @@
 ChecklistStatus.Completed);
     }
 
+    // Toggle profile menu
     private void ToggleProfileMenu()
     {
         showProfileMenu = !showProfileMenu;
+    }
+
+    // Close profile menu
+    private void CloseProfileMenu()
+    {
+        showProfileMenu = false;
     }
 }
