@@ -6,9 +6,13 @@
 @using OnboardingApp.Models
 @attribute [Authorize(Roles = "Admin")]
 @inject ApplicationDbContext Db
+@inject NavigationManager Nav
 
 <div class="admin-quiz-page">
     <div class="admin-page-header">
+        <button class="back-button" @onclick="GoBack">
+            ← Tillbaka till modulen
+        </button>
         <div>
             <h1>Hantera quiz för @module?.Title-modulen</h1>
         </div>
@@ -310,5 +314,10 @@
 
         message = "Svarsalternativet togs bort.";
         await LoadModule();
+    }
+
+    private void GoBack()
+    {
+        Nav.NavigateTo($"/admin/moduler");
     }
 }
